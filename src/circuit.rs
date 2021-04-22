@@ -11,6 +11,8 @@ use crate::constraint_system::StandardComposer;
 use crate::error::Error;
 use crate::proof_system::{Proof, Prover, ProverKey, Verifier, VerifierKey};
 use alloc::vec::Vec;
+#[cfg(feature = "std")]
+use ark_std::{end_timer, start_timer};
 #[cfg(feature = "canon")]
 use canonical_derive::Canon;
 use dusk_bls12_381::BlsScalar;
@@ -176,18 +178,23 @@ pub fn verify_proof(
     pub_inputs_positions: &[usize],
     transcript_init: &'static [u8],
 ) -> Result<(), Error> {
+    #[cfg(feature = "std")]
+    let start = start_timer!(|| "Verifier instance generation");
     let mut verifier = Verifier::new(transcript_init);
     verifier.verifier_key = Some(*verifier_key);
-    verifier.verify(
-        proof,
-        pub_params.opening_key(),
-        build_pi(
-            pub_inputs_values,
-            pub_inputs_positions,
-            verifier_key.padded_circuit_size(),
-        )
-        .as_slice(),
-    )
+    #[cfg(feature = "std")]
+    end_timer!(start);
+
+    #[cfg(feature = "std")]
+    let start = start_timer!(|| "Build PI");
+    let pi = build_pi(
+        pub_inputs_values,
+        pub_inputs_positions,
+        verifier_key.padded_circuit_size(),
+    );
+    #[cfg(feature = "std")]
+    end_timer!(start);
+    verifier.verify(proof, pub_params.opening_key(), pi.as_slice())
 }
 
 /// Build PI vector for Proof verifications.
@@ -365,13 +372,17 @@ mod tests {
             .into(),
         ];
 
-        verify_proof(
+        let start = start_timer!(|| "Proof verification start");
+        let res = verify_proof(
             &pp,
             &verif_data.key(),
             &proof,
             &public_inputs2,
             &verif_data.pi_pos(),
             b"Test",
-        )
+        );
+        end_timer!(start);
+
+        res
     }
 }

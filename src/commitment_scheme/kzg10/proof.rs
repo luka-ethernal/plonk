@@ -26,8 +26,12 @@ pub(crate) mod alloc {
     use crate::transcript::TranscriptProtocol;
     use crate::util::powers_of;
     use ::alloc::vec::Vec;
+    #[cfg(feature = "std")]
+    use ark_std::{end_timer, start_timer};
     use dusk_bls12_381::G1Projective;
     use merlin::Transcript;
+    #[cfg(feature = "std")]
+    use rayon::prelude::*;
 
     /// Proof that multiple polynomials were correctly evaluated at a point `z`,
     /// each producing their respective evaluated points p_i(z).
@@ -60,6 +64,7 @@ pub(crate) mod alloc {
             self.commitments_to_polynomials.push(part.1);
         }
 
+        #[cfg(not(feature = "std"))]
         /// Flattens an `AggregateProof` into a `Proof`.
         /// The transcript must have the same view as the transcript that was
         /// used to aggregate the witness in the proving stage.
@@ -69,7 +74,6 @@ pub(crate) mod alloc {
                 &challenge,
                 self.commitments_to_polynomials.len() - 1,
             );
-
             // Flattened polynomial commitments using challenge
             let flattened_poly_commitments: G1Projective = self
                 .commitments_to_polynomials
@@ -84,7 +88,43 @@ pub(crate) mod alloc {
                 .zip(powers.iter())
                 .map(|(eval, challenge)| eval * challenge)
                 .fold(BlsScalar::zero(), |acc, current_val| acc + current_val);
+            Proof {
+                commitment_to_witness: self.commitment_to_witness,
+                evaluated_point: flattened_poly_evaluations,
+                commitment_to_polynomial: Commitment::from(
+                    flattened_poly_commitments,
+                ),
+            }
+        }
 
+        #[cfg(feature = "std")]
+        /// Flattens an `AggregateProof` into a `Proof`.
+        /// The transcript must have the same view as the transcript that was
+        /// used to aggregate the witness in the proving stage.
+        pub(crate) fn flatten(&self, transcript: &mut Transcript) -> Proof {
+            let challenge = transcript.challenge_scalar(b"aggregate_witness");
+            let start = start_timer!(|| "Powers of");
+            let powers = powers_of(
+                &challenge,
+                self.commitments_to_polynomials.len() - 1,
+            );
+            end_timer!(start);
+            let start = start_timer!(|| "iter_work");
+            // Flattened polynomial commitments using challenge
+            let flattened_poly_commitments: G1Projective = self
+                .commitments_to_polynomials
+                .par_iter()
+                .zip(powers.par_iter())
+                .map(|(poly, challenge)| poly.0 * challenge)
+                .sum();
+            // Flattened evaluation points
+            let flattened_poly_evaluations: BlsScalar = self
+                .evaluated_points
+                .par_iter()
+                .zip(powers.par_iter())
+                .map(|(eval, challenge)| eval * challenge)
+                .sum();
+            end_timer!(start);
             Proof {
                 commitment_to_witness: self.commitment_to_witness,
                 evaluated_point: flattened_poly_evaluations,

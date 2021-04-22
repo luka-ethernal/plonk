@@ -124,6 +124,7 @@ pub(crate) mod alloc {
         util::batch_inversion,
     };
     use ::alloc::vec::Vec;
+    use ark_std::{end_timer, start_timer};
     use dusk_bls12_381::{
         multiscalar_mul::msm_variable_base, BlsScalar, G1Affine,
     };
@@ -140,10 +141,12 @@ pub(crate) mod alloc {
             opening_key: &OpeningKey,
             pub_inputs: &[BlsScalar],
         ) -> Result<(), Error> {
+            let start = start_timer!(|| "EvaluationDomain creation");
             let domain = EvaluationDomain::new(verifier_key.n)?;
-
+            end_timer!(start);
             // Subgroup checks are done when the proof is deserialised.
 
+            let start = start_timer!(|| "Transcript stuff");
             // In order for the Verifier and Prover to have the same view in the
             // non-interactive setting Both parties must commit the same
             // elements into the transcript Below the verifier will simulate
@@ -184,16 +187,23 @@ pub(crate) mod alloc {
             // Compute evaluation challenge
             let z_challenge = transcript.challenge_scalar(b"z");
 
+            end_timer!(start);
+
+            let start = start_timer!(|| "Vanishing poly eval");
             // Compute zero polynomial evaluated at `z_challenge`
             let z_h_eval = domain.evaluate_vanishing_polynomial(&z_challenge);
+            end_timer!(start);
 
+            let start = start_timer!(|| "Compute first lagrange eval");
             // Compute first lagrange polynomial evaluated at `z_challenge`
             let l1_eval = compute_first_lagrange_evaluation(
                 &domain,
                 &z_h_eval,
                 &z_challenge,
             );
+            end_timer!(start);
 
+            let start = start_timer!(|| "Compute quotient eval");
             // Compute quotient polynomial evaluated at `z_challenge`
             let t_eval = self.compute_quotient_evaluation(
                 &domain,
@@ -206,13 +216,17 @@ pub(crate) mod alloc {
                 &l1_eval,
                 &self.evaluations.perm_eval,
             );
+            end_timer!(start);
 
+            let start = start_timer!(|| "Compute quotient commitment");
             // Compute commitment to quotient polynomial
             // This method is necessary as we pass the `un-splitted` variation
             // to our commitment scheme
             let t_comm =
                 self.compute_quotient_commitment(&z_challenge, domain.size());
+            end_timer!(start);
 
+            let start = start_timer!(|| "More Transcript stuff");
             // Add evaluations to transcript
             transcript.append_scalar(b"a_eval", &self.evaluations.a_eval);
             transcript.append_scalar(b"b_eval", &self.evaluations.b_eval);
@@ -245,7 +259,9 @@ pub(crate) mod alloc {
             transcript.append_scalar(b"t_eval", &t_eval);
             transcript
                 .append_scalar(b"r_eval", &self.evaluations.lin_poly_eval);
+            end_timer!(start);
 
+            let start = start_timer!(|| "Compute linearisation commitment");
             // Compute linearisation commitment
             let r_comm = self.compute_linearisation_commitment(
                 &alpha,
@@ -261,7 +277,7 @@ pub(crate) mod alloc {
                 l1_eval,
                 &verifier_key,
             );
-
+            end_timer!(start);
             // Commitment Scheme
             // Now we delegate computation to the commitment scheme by batch
             // checking two proofs.
@@ -272,6 +288,8 @@ pub(crate) mod alloc {
             // permutation polynomial evaluated at the shifted root of unity is
             // correct
 
+            let start_proof = start_timer!(|| "Aggregate Proof block");
+            let start = start_timer!(|| "AggregateProof add parts");
             // Compose the Aggregated Proof
             //
             let mut aggregate_proof =
@@ -294,10 +312,13 @@ pub(crate) mod alloc {
                 self.evaluations.out_sigma_eval,
                 verifier_key.permutation.out_sigma,
             ));
+            end_timer!(start);
+            let start = start_timer!(|| "AggregateProof flatten");
             // Flatten proof with opening challenge
             let flattened_proof_a = aggregate_proof.flatten(transcript);
-
+            end_timer!(start);
             // Compose the shifted aggregate proof
+            let start = start_timer!(|| "Shifted AggregateProof add parts");
             let mut shifted_aggregate_proof =
                 AggregateProof::with_witness(self.w_zw_comm);
             shifted_aggregate_proof
@@ -308,12 +329,19 @@ pub(crate) mod alloc {
                 .add_part((self.evaluations.b_next_eval, self.b_comm));
             shifted_aggregate_proof
                 .add_part((self.evaluations.d_next_eval, self.d_comm));
+            end_timer!(start);
+            let start = start_timer!(|| "Shifted AggregateProof flatten");
             let flattened_proof_b = shifted_aggregate_proof.flatten(transcript);
+            end_timer!(start);
+            end_timer!(start_proof);
 
+            let start = start_timer!(|| "Append w_z commitments");
             // Add commitment to openings to transcript
             transcript.append_commitment(b"w_z", &self.w_z_comm);
             transcript.append_commitment(b"w_z_w", &self.w_zw_comm);
+            end_timer!(start);
 
+            let start = start_timer!(|| "Final batch check");
             // Batch check
             if opening_key
                 .batch_check(
@@ -325,6 +353,8 @@ pub(crate) mod alloc {
             {
                 return Err(Error::ProofVerificationError);
             }
+
+            end_timer!(start);
             Ok(())
         }
 
