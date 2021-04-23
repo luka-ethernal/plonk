@@ -12,12 +12,18 @@ use crate::{
     error::Error, fft::Polynomial, transcript::TranscriptProtocol, util,
 };
 use alloc::vec::Vec;
+#[cfg(feature = "std")]
+use ark_std::{end_timer, start_timer};
 use dusk_bls12_381::{
     multiscalar_mul::msm_variable_base, BlsScalar, G1Affine, G1Projective,
     G2Affine, G2Prepared,
 };
 use dusk_bytes::{DeserializableSlice, Serializable};
 use merlin::Transcript;
+#[cfg(feature = "std")]
+use rayon::prelude::*;
+#[cfg(feature = "std")]
+use std::sync::Mutex;
 
 /// CommitKey is used to commit to a polynomial which is bounded by the
 /// max_degree.
@@ -257,6 +263,7 @@ impl OpeningKey {
         }
     }
 
+    #[cfg(not(feature = "std"))]
     /// Checks whether a batch of polynomials evaluated at different points,
     /// returned their specified value.
     pub(crate) fn batch_check(
@@ -274,7 +281,6 @@ impl OpeningKey {
         // accumulate their coefficients and perform a final
         // multiplication at the end.
         let mut g_multiplier = BlsScalar::zero();
-
         for ((proof, challenge), point) in proofs.iter().zip(powers).zip(points)
         {
             let mut c = G1Projective::from(proof.commitment_to_polynomial.0);
@@ -285,10 +291,60 @@ impl OpeningKey {
             total_c += c * challenge;
             total_w += w * challenge;
         }
-        total_c -= self.g * g_multiplier;
 
         let affine_total_w = G1Affine::from(-total_w);
         let affine_total_c = G1Affine::from(total_c);
+
+        let pairing = dusk_bls12_381::multi_miller_loop(&[
+            (&affine_total_w, &self.prepared_beta_h),
+            (&affine_total_c, &self.prepared_h),
+        ])
+        .final_exponentiation();
+
+        if pairing != dusk_bls12_381::Gt::identity() {
+            return Err(Error::PairingCheckFailure);
+        };
+        Ok(())
+    }
+
+    #[cfg(feature = "std")]
+    /// Checks whether a batch of polynomials evaluated at different points,
+    /// returned their specified value.
+    pub(crate) fn batch_check(
+        &self,
+        points: &[BlsScalar],
+        proofs: &[Proof],
+        transcript: &mut Transcript,
+    ) -> Result<(), Error> {
+        let total_c: Mutex<G1Projective> = Mutex::new(G1Projective::identity());
+        let total_w: Mutex<G1Projective> = Mutex::new(G1Projective::identity());
+
+        let challenge = transcript.challenge_scalar(b"batch"); // XXX: Verifier can add their own randomness at this point
+        let powers = util::powers_of(&challenge, proofs.len() - 1);
+        // Instead of multiplying g and gamma_g in each turn, we simply
+        // accumulate their coefficients and perform a final
+        // multiplication at the end.
+        let g_multiplier = Mutex::new(BlsScalar::zero());
+        let iterator = proofs
+            .par_iter()
+            .zip(powers.par_iter())
+            .zip(points.par_iter());
+
+        for ((proof, challenge), point) in iterator {
+            let mut c = G1Projective::from(proof.commitment_to_polynomial.0);
+            let w = proof.commitment_to_witness.0;
+            c += w * point;
+            let mut g_mult = g_multiplier.lock().unwrap();
+            *g_mult += challenge * proof.evaluated_point;
+
+            let mut total_c = total_c.lock().unwrap();
+            let mut total_w = total_w.lock().unwrap();
+            *total_c += c * challenge;
+            *total_w += w * challenge;
+        }
+
+        let affine_total_w = G1Affine::from(-total_w.into_inner().unwrap());
+        let affine_total_c = G1Affine::from(total_c.into_inner().unwrap());
 
         let pairing = dusk_bls12_381::multi_miller_loop(&[
             (&affine_total_w, &self.prepared_beta_h),
