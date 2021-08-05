@@ -5,9 +5,11 @@
 // Copyright (c) DUSK NETWORK. All rights reserved.
 
 use crate::bls12_381::BlsScalar;
+use crate::error::Error;
 use crate::fft::{EvaluationDomain, Polynomial};
-use crate::plookup::error::PlookupErrors;
-use std::ops::{Add, Mul};
+use alloc::vec::Vec;
+use core::ops::{Add, Mul};
+use dusk_bytes::{DeserializableSlice, Serializable};
 
 /// MultiSet is struct containing vectors of scalars, which
 /// individually represents either a wire value or an index
@@ -31,6 +33,26 @@ impl MultiSet {
     /// Creates an empty vector with a multiset wrapper around it
     pub fn new() -> MultiSet {
         MultiSet(vec![])
+    }
+
+    /// Generate a `MultiSet` struct from a slice of bytes.
+    pub fn from_slice(bytes: &[u8]) -> Result<MultiSet, Error> {
+        let mut buffer = bytes;
+        let elements = buffer
+            .chunks(BlsScalar::SIZE)
+            .map(|chunk| BlsScalar::from_slice(chunk))
+            .collect::<Result<Vec<BlsScalar>, dusk_bytes::Error>>()?;
+        Ok(MultiSet(elements))
+    }
+
+    /// Given a [`MultiSet`], return it in it's bytes representation
+    /// element by element.
+    pub fn to_var_bytes(&self) -> Vec<u8> {
+        self.0
+            .iter()
+            .map(|item| item.to_bytes().to_vec())
+            .flatten()
+            .collect()
     }
 
     /// Extends the length of the multiset to n elements
@@ -76,13 +98,11 @@ impl MultiSet {
     /// Then we combine the multisets together and sort
     /// their elements together. The final MultiSet will
     /// look as follows, s: {1,1,2,2,3,3,4,4}
-    pub fn sorted_concat(&self, f: &MultiSet) -> Result<MultiSet, PlookupErrors> {
+    pub fn sorted_concat(&self, f: &MultiSet) -> Result<MultiSet, Error> {
         let mut s = self.clone();
         s.0.reserve(f.0.len());
         for element in f.0.iter() {
-            let index = s
-                .position(element)
-                .ok_or(PlookupErrors::ElementNotIndexed)?;
+            let index = s.position(element).ok_or(Error::ElementNotIndexed)?;
             s.0.insert(index, *element);
         }
 
@@ -135,7 +155,10 @@ impl MultiSet {
     /// Treats each element in the multiset as evaluation points
     /// Computes IFFT of the set of evaluation points
     /// and returns the coefficients as a Polynomial data structure
-    pub fn to_polynomial(&self, domain: &EvaluationDomain) -> Polynomial {
+    pub(crate) fn to_polynomial(
+        &self,
+        domain: &EvaluationDomain,
+    ) -> Polynomial {
         Polynomial::from_coefficients_vec(domain.ifft(&self.0))
     }
 
@@ -144,7 +167,10 @@ impl MultiSet {
     /// the transcript.
     /// The function iterates over the given sets and mutiplies by alpha:
     /// a + (b * alpha) + (c * alpha^2)  
-    pub fn compress_three_arity(multisets: [&MultiSet; 3], alpha: BlsScalar) -> MultiSet {
+    pub fn compress_three_arity(
+        multisets: [&MultiSet; 3],
+        alpha: BlsScalar,
+    ) -> MultiSet {
         MultiSet(
             multisets[0]
                 .0
@@ -161,7 +187,10 @@ impl MultiSet {
     /// the transcript.
     /// The function iterates over the given sets and mutiplies by alpha:
     /// a + (b * alpha) + (c * alpha^2) + (d * alpha^3)  
-    pub fn compress_four_arity(multisets: [&MultiSet; 4], alpha: BlsScalar) -> MultiSet {
+    pub fn compress_four_arity(
+        multisets: [&MultiSet; 4],
+        alpha: BlsScalar,
+    ) -> MultiSet {
         MultiSet(
             multisets[0]
                 .0
@@ -170,7 +199,9 @@ impl MultiSet {
                 .zip(multisets[2].0.iter())
                 .zip(multisets[3].0.iter())
                 .map(|(((a, b), c), d)| {
-                    a + b * alpha + c * alpha.square() + d * alpha.pow(&[3u64, 0u64, 0u64, 0u64])
+                    a + b * alpha
+                        + c * alpha.square()
+                        + d * alpha.pow(&[3u64, 0u64, 0u64, 0u64])
                 })
                 .collect::<Vec<BlsScalar>>(),
         )
@@ -358,11 +389,17 @@ mod test {
         // Fill in wires directly, no need to use a
         // plookup table as this will not be going
         // into a proof
-        table.from_wire_values(BlsScalar::from(1), BlsScalar::from(2), BlsScalar::from(3));
+        table.from_wire_values(
+            BlsScalar::from(1),
+            BlsScalar::from(2),
+            BlsScalar::from(3),
+        );
 
         // Computed expected result
-        let compressed_element =
-            MultiSet::compress_three_arity([&table.f_1, &table.f_2, &table.f_3], alpha);
+        let compressed_element = MultiSet::compress_three_arity(
+            [&table.f_1, &table.f_2, &table.f_3],
+            alpha,
+        );
 
         let actual_element = BlsScalar::from(1)
             + (BlsScalar::from(2) * alpha)

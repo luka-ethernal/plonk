@@ -11,17 +11,19 @@
 //! output of gates within a circuit, without
 //! computing them.
 
-pub mod error;
+cfg_if::cfg_if!(
+    if #[cfg(feature = "alloc")] {
 /// Multiset
 pub mod multiset;
 /// hello
 pub mod table;
 // pub mod plookup;
 
-pub use error::PlookupErrors;
 pub use multiset::MultiSet;
 pub use table::{
     lookup_table::{PlookupTable3Arity, PlookupTable4Arity},
     preprocess::{PreprocessedTable3Arity, PreprocessedTable4Arity},
     witness_table::{WitnessTable3Arity, WitnessTable4Arity},
 };
+}
+);
