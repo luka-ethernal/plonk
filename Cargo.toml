@@ -37,6 +37,7 @@ canonical_derive = {version = "0.6", optional = true}
 
 [dev-dependencies]
 tempdir = "0.3"
+criterion = "0.3"
 
 [features]
 default = ["std"]
@@ -53,3 +54,8 @@ alloc = ["dusk-bls12_381/alloc"]
 trace = []
 trace-print = ["trace"]
 canon = ["dusk-bls12_381/canon", "dusk-jubjub/canon", "canonical", "canonical_derive"]
+
+[[bench]]
+name="plonkup"
+harness=false
+
