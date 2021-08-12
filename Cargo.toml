@@ -34,10 +34,10 @@ cfg-if = "1.0"
 # Dusk related deps for WASMI serde
 canonical = {version = "0.6", optional = true}
 canonical_derive = {version = "0.6", optional = true}
+criterion = "0.3"
 
 [dev-dependencies]
 tempdir = "0.3"
-criterion = "0.3"
 
 [features]
 default = ["std"]
@@ -56,6 +56,7 @@ trace-print = ["trace"]
 canon = ["dusk-bls12_381/canon", "dusk-jubjub/canon", "canonical", "canonical_derive"]
 
 [[bench]]
-name="plonkup"
+path="src/benches/"
+name="granular_prover"
 harness=false
 

@@ -51,9 +51,11 @@
 // It can be refactored but for now, we avoid these warns.
 #![allow(clippy::too_many_arguments)]
 #![deny(rustdoc::broken_intra_doc_links)]
-#![deny(missing_docs)]
+//#![deny(missing_docs)]
 #![no_std]
 #![feature(test)]
+
+extern crate criterion;
 
 #[cfg(feature = "std")]
 extern crate std;
@@ -75,6 +77,8 @@ mod fft;
 pub mod plookup;
 pub mod prelude;
 pub mod proof_system;
+///
+pub mod benches;
 mod transcript;
 
 #[doc = include_str!("../docs/notes-intro.md")]
