@@ -8,12 +8,12 @@ use crate::fft::{Evaluations, Polynomial};
 use dusk_bls12_381::BlsScalar;
 
 #[derive(Debug, Eq, PartialEq, Clone)]
-pub(crate) struct ProverKey {
-    pub(crate) q_range: (Polynomial, Evaluations),
+pub struct ProverKey {
+    pub q_range: (Polynomial, Evaluations),
 }
 
 impl ProverKey {
-    pub(crate) fn compute_quotient_i(
+    pub fn compute_quotient_i(
         &self,
         index: usize,
         range_separation_challenge: &BlsScalar,
@@ -40,7 +40,7 @@ impl ProverKey {
         (b_1 + b_2 + b_3 + b_4) * q_range_i * range_separation_challenge
     }
 
-    pub(crate) fn compute_linearisation(
+    pub fn compute_linearisation(
         &self,
         range_separation_challenge: &BlsScalar,
         a_eval: &BlsScalar,
@@ -71,7 +71,7 @@ impl ProverKey {
 }
 
 // Computes f(f-1)(f-2)(f-3)
-pub(crate) fn delta(f: BlsScalar) -> BlsScalar {
+pub fn delta(f: BlsScalar) -> BlsScalar {
     let f_1 = f - BlsScalar::one();
     let f_2 = f - BlsScalar::from(2);
     let f_3 = f - BlsScalar::from(3);

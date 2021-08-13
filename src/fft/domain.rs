@@ -19,21 +19,21 @@ use dusk_bytes::{DeserializableSlice, Serializable};
 /// only for fields that have a large multiplicative subgroup of size that is
 /// a power-of-2.
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
-pub(crate) struct EvaluationDomain {
+pub struct EvaluationDomain {
     /// The size of the domain.
-    pub(crate) size: u64,
+    pub size: u64,
     /// `log_2(self.size)`.
-    pub(crate) log_size_of_group: u32,
+    pub log_size_of_group: u32,
     /// Size of the domain as a field element.
-    pub(crate) size_as_field_element: BlsScalar,
+    pub size_as_field_element: BlsScalar,
     /// Inverse of the size in the field.
-    pub(crate) size_inv: BlsScalar,
+    pub size_inv: BlsScalar,
     /// A generator of the subgroup.
-    pub(crate) group_gen: BlsScalar,
+    pub group_gen: BlsScalar,
     /// Inverse of the generator of the subgroup.
-    pub(crate) group_gen_inv: BlsScalar,
+    pub group_gen_inv: BlsScalar,
     /// Multiplicative generator of the finite field.
-    pub(crate) generator_inv: BlsScalar,
+    pub generator_inv: BlsScalar,
 }
 
 impl Serializable<{ u64::SIZE + u32::SIZE + 5 * BlsScalar::SIZE }>
@@ -83,7 +83,7 @@ impl Serializable<{ u64::SIZE + u32::SIZE + 5 * BlsScalar::SIZE }>
 }
 
 #[cfg(feature = "alloc")]
-pub(crate) mod alloc {
+pub mod alloc {
 
     use super::*;
     use crate::error::Error;
@@ -97,7 +97,7 @@ pub(crate) mod alloc {
     impl EvaluationDomain {
         /// Construct a domain that is large enough for evaluations of a
         /// polynomial having `num_coeffs` coefficients.
-        pub(crate) fn new(num_coeffs: usize) -> Result<Self, Error> {
+        pub fn new(num_coeffs: usize) -> Result<Self, Error> {
             // Compute the size of our evaluation domain
             let size = num_coeffs.next_power_of_two() as u64;
             let log_size_of_group = size.trailing_zeros();
@@ -131,12 +131,12 @@ pub(crate) mod alloc {
         }
 
         /// Return the size of `self`.
-        pub(crate) fn size(&self) -> usize {
+        pub fn size(&self) -> usize {
             self.size as usize
         }
 
         /// Compute a FFT.
-        pub(crate) fn fft(&self, coeffs: &[BlsScalar]) -> Vec<BlsScalar> {
+        pub fn fft(&self, coeffs: &[BlsScalar]) -> Vec<BlsScalar> {
             let mut coeffs = coeffs.to_vec();
             self.fft_in_place(&mut coeffs);
             coeffs
@@ -149,7 +149,7 @@ pub(crate) mod alloc {
         }
 
         /// Compute an IFFT.
-        pub(crate) fn ifft(&self, evals: &[BlsScalar]) -> Vec<BlsScalar> {
+        pub fn ifft(&self, evals: &[BlsScalar]) -> Vec<BlsScalar> {
             let mut evals = evals.to_vec();
             self.ifft_in_place(&mut evals);
             evals
@@ -157,7 +157,7 @@ pub(crate) mod alloc {
 
         /// Compute an IFFT, modifying the vector in place.
         #[inline]
-        pub(crate) fn ifft_in_place(&self, evals: &mut Vec<BlsScalar>) {
+        pub fn ifft_in_place(&self, evals: &mut Vec<BlsScalar>) {
             evals.resize(self.size(), BlsScalar::zero());
             best_fft(evals, self.group_gen_inv, self.log_size_of_group);
 
@@ -177,7 +177,7 @@ pub(crate) mod alloc {
         }
 
         /// Compute a FFT over a coset of the domain.
-        pub(crate) fn coset_fft(&self, coeffs: &[BlsScalar]) -> Vec<BlsScalar> {
+        pub fn coset_fft(&self, coeffs: &[BlsScalar]) -> Vec<BlsScalar> {
             let mut coeffs = coeffs.to_vec();
             self.coset_fft_in_place(&mut coeffs);
             coeffs
@@ -191,7 +191,7 @@ pub(crate) mod alloc {
         }
 
         /// Compute an IFFT over a coset of the domain.
-        pub(crate) fn coset_ifft(&self, evals: &[BlsScalar]) -> Vec<BlsScalar> {
+        pub fn coset_ifft(&self, evals: &[BlsScalar]) -> Vec<BlsScalar> {
             let mut evals = evals.to_vec();
             self.coset_ifft_in_place(&mut evals);
             evals
@@ -207,7 +207,7 @@ pub(crate) mod alloc {
         #[allow(clippy::needless_range_loop)]
         /// Evaluate all the lagrange polynomials defined by this domain at the
         /// point `tau`.
-        pub(crate) fn evaluate_all_lagrange_coefficients(
+        pub fn evaluate_all_lagrange_coefficients(
             &self,
             tau: BlsScalar,
         ) -> Vec<BlsScalar> {
@@ -259,7 +259,7 @@ pub(crate) mod alloc {
         /// This evaluates the vanishing polynomial for this domain at tau.
         /// For multiplicative subgroups, this polynomial is `z(X) = X^self.size
         /// - 1`.
-        pub(crate) fn evaluate_vanishing_polynomial(
+        pub fn evaluate_vanishing_polynomial(
             &self,
             tau: &BlsScalar,
         ) -> BlsScalar {
@@ -269,7 +269,7 @@ pub(crate) mod alloc {
         /// Given that the domain size is `D`  
         /// This function computes the `D` evaluation points for
         /// the vanishing polynomial of degree `n` over a coset
-        pub(crate) fn compute_vanishing_poly_over_coset(
+        pub fn compute_vanishing_poly_over_coset(
             &self,            // domain to evaluate over
             poly_degree: u64, // degree of the vanishing polynomial
         ) -> Evaluations {
@@ -291,7 +291,7 @@ pub(crate) mod alloc {
         }
 
         /// Return an iterator over the elements of the domain.
-        pub(crate) fn elements(&self) -> Elements {
+        pub fn elements(&self) -> Elements {
             Elements {
                 cur_elem: BlsScalar::one(),
                 cur_pow: 0,
@@ -317,11 +317,7 @@ pub(crate) mod alloc {
     }
 
     #[cfg(feature = "alloc")]
-    pub(crate) fn serial_fft(
-        a: &mut [BlsScalar],
-        omega: BlsScalar,
-        log_n: u32,
-    ) {
+    pub fn serial_fft(a: &mut [BlsScalar], omega: BlsScalar, log_n: u32) {
         let n = a.len() as u32;
         assert_eq!(n, 1 << log_n);
 
@@ -358,7 +354,7 @@ pub(crate) mod alloc {
 
     /// An iterator over the elements of the domain.
     #[derive(Debug)]
-    pub(crate) struct Elements {
+    pub struct Elements {
         cur_elem: BlsScalar,
         cur_pow: u64,
         domain: EvaluationDomain,

@@ -7,9 +7,9 @@
 use crate::commitment_scheme::kzg10::Commitment;
 
 #[derive(Debug, PartialEq, Eq, Copy, Clone)]
-pub(crate) struct VerifierKey {
-    pub(crate) q_c: Commitment,
-    pub(crate) q_logic: Commitment,
+pub struct VerifierKey {
+    pub q_c: Commitment,
+    pub q_logic: Commitment,
 }
 
 #[cfg(feature = "alloc")]
@@ -21,7 +21,7 @@ mod alloc {
     use dusk_bls12_381::{BlsScalar, G1Affine};
 
     impl VerifierKey {
-        pub(crate) fn compute_linearisation_commitment(
+        pub fn compute_linearisation_commitment(
             &self,
             logic_separation_challenge: &BlsScalar,
             scalars: &mut Vec<BlsScalar>,

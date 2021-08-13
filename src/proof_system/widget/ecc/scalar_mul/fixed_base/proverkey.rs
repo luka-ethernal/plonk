@@ -9,15 +9,15 @@ use dusk_bls12_381::BlsScalar;
 use dusk_jubjub::EDWARDS_D;
 
 #[derive(Debug, Eq, PartialEq, Clone)]
-pub(crate) struct ProverKey {
-    pub(crate) q_l: (Polynomial, Evaluations),
-    pub(crate) q_r: (Polynomial, Evaluations),
-    pub(crate) q_c: (Polynomial, Evaluations),
-    pub(crate) q_fixed_group_add: (Polynomial, Evaluations),
+pub struct ProverKey {
+    pub q_l: (Polynomial, Evaluations),
+    pub q_r: (Polynomial, Evaluations),
+    pub q_c: (Polynomial, Evaluations),
+    pub q_fixed_group_add: (Polynomial, Evaluations),
 }
 
 impl ProverKey {
-    pub(crate) fn compute_quotient_i(
+    pub fn compute_quotient_i(
         &self,
         index: usize,
         ecc_separation_challenge: &BlsScalar,
@@ -83,7 +83,7 @@ impl ProverKey {
         identity * q_fixed_group_add_i * ecc_separation_challenge
     }
 
-    pub(crate) fn compute_linearisation(
+    pub fn compute_linearisation(
         &self,
         ecc_separation_challenge: &BlsScalar,
         a_eval: &BlsScalar,
@@ -149,16 +149,13 @@ impl ProverKey {
     }
 }
 
-pub(crate) fn extract_bit(
-    curr_acc: &BlsScalar,
-    next_acc: &BlsScalar,
-) -> BlsScalar {
+pub fn extract_bit(curr_acc: &BlsScalar, next_acc: &BlsScalar) -> BlsScalar {
     // Next - 2 * current
     next_acc - curr_acc - curr_acc
 }
 
 // Ensures that the bit is either +1, -1 or 0
-pub(crate) fn check_bit_consistency(bit: BlsScalar) -> BlsScalar {
+pub fn check_bit_consistency(bit: BlsScalar) -> BlsScalar {
     let one = BlsScalar::one();
     bit * (bit - one) * (bit + one)
 }

@@ -12,11 +12,11 @@ use dusk_bls12_381::BlsScalar;
 
 #[derive(Debug, Eq, PartialEq, Clone)]
 pub struct ProverKey {
-    pub(crate) q_lookup: (Polynomial, Evaluations),
-    pub(crate) table_1: (MultiSet, Polynomial, Evaluations),
-    pub(crate) table_2: (MultiSet, Polynomial, Evaluations),
-    pub(crate) table_3: (MultiSet, Polynomial, Evaluations),
-    pub(crate) table_4: (MultiSet, Polynomial, Evaluations),
+    pub q_lookup: (Polynomial, Evaluations),
+    pub table_1: (MultiSet, Polynomial, Evaluations),
+    pub table_2: (MultiSet, Polynomial, Evaluations),
+    pub table_3: (MultiSet, Polynomial, Evaluations),
+    pub table_4: (MultiSet, Polynomial, Evaluations),
 }
 
 impl ProverKey {

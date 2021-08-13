@@ -19,19 +19,19 @@ use rayon::iter::{IntoParallelIterator, ParallelIterator};
 /// to create the permutation polynomial. In the literature, Z(X) is the
 /// "accumulator", this is what this codebase calls the permutation polynomial.
 #[derive(Debug)]
-pub(crate) struct Permutation {
+pub struct Permutation {
     // Maps a variable to the wires that it is associated to.
-    pub(crate) variable_map: HashMap<Variable, Vec<WireData>>,
+    pub variable_map: HashMap<Variable, Vec<WireData>>,
 }
 
 impl Permutation {
     /// Creates a Permutation struct with an expected capacity of zero.
-    pub(crate) fn new() -> Permutation {
+    pub fn new() -> Permutation {
         Permutation::with_capacity(0)
     }
 
     /// Creates a Permutation struct with an expected capacity of `n`.
-    pub(crate) fn with_capacity(expected_size: usize) -> Permutation {
+    pub fn with_capacity(expected_size: usize) -> Permutation {
         Permutation {
             variable_map: HashMap::with_capacity(expected_size),
         }
@@ -40,7 +40,7 @@ impl Permutation {
     /// Creates a new [`Variable`] by incrementing the index of the
     /// `variable_map`. This is correct as whenever we add a new [`Variable`]
     /// into the system It is always allocated in the `variable_map`.
-    pub(crate) fn new_variable(&mut self) -> Variable {
+    pub fn new_variable(&mut self) -> Variable {
         // Generate the Variable
         let var = Variable(self.variable_map.keys().len());
 
@@ -87,7 +87,7 @@ impl Permutation {
         self.add_variable_to_map(d, fourth);
     }
 
-    pub(crate) fn add_variable_to_map(
+    pub fn add_variable_to_map(
         &mut self,
         var: Variable,
         wire_data: WireData,
@@ -174,7 +174,7 @@ impl Permutation {
 
     /// Computes the sigma polynomials which are used to build the permutation
     /// polynomial
-    pub(crate) fn compute_sigma_polynomials(
+    pub fn compute_sigma_polynomials(
         &mut self,
         n: usize,
         domain: &EvaluationDomain,
@@ -630,7 +630,7 @@ impl Permutation {
     // parallelizable. This can be adapted into a general product argument
     // for any number of wires, with specific formulas defined
     // in the numerator_irreducible and denominator_irreducible functions
-    pub(crate) fn compute_permutation_poly(
+    pub fn compute_permutation_poly(
         &self,
         domain: &EvaluationDomain,
         wires: (&[BlsScalar], &[BlsScalar], &[BlsScalar], &[BlsScalar]),
@@ -726,7 +726,7 @@ impl Permutation {
 
         Polynomial::from_coefficients_vec(domain.ifft(&z))
     }
-    pub(crate) fn compute_lookup_permutation_poly(
+    pub fn compute_lookup_permutation_poly(
         &self,
         domain: &EvaluationDomain,
         f: &[BlsScalar],
@@ -1398,7 +1398,7 @@ mod test {
 // We wil use this helper function to compensate
 use rand_core::RngCore;
 #[allow(dead_code)]
-pub(crate) fn random_scalar<R: RngCore>(rng: &mut R) -> BlsScalar {
+pub fn random_scalar<R: RngCore>(rng: &mut R) -> BlsScalar {
     BlsScalar::from_raw([
         rng.next_u64(),
         rng.next_u64(),

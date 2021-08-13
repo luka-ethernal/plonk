@@ -8,7 +8,7 @@ use crate::fft::{Evaluations, Polynomial};
 use dusk_bls12_381::BlsScalar;
 
 #[derive(Debug, Eq, PartialEq, Clone)]
-pub(crate) struct ProverKey {
+pub struct ProverKey {
     pub q_m: (Polynomial, Evaluations),
     pub q_l: (Polynomial, Evaluations),
     pub q_r: (Polynomial, Evaluations),
@@ -19,7 +19,7 @@ pub(crate) struct ProverKey {
 }
 
 impl ProverKey {
-    pub(crate) fn compute_quotient_i(
+    pub fn compute_quotient_i(
         &self,
         index: usize,
         w_l_i: &BlsScalar,
@@ -47,7 +47,7 @@ impl ProverKey {
         (a_1 + a_2 + a_3 + a_4 + a_5 + a_6) * q_arith_i
     }
 
-    pub(crate) fn compute_linearisation(
+    pub fn compute_linearisation(
         &self,
         a_eval: &BlsScalar,
         b_eval: &BlsScalar,

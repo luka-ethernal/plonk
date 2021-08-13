@@ -157,10 +157,7 @@ impl CommitKey {
     ///
     /// Returns an error if the polynomial's degree is more than the max degree
     /// of the commit key.
-    pub(crate) fn commit(
-        &self,
-        polynomial: &Polynomial,
-    ) -> Result<Commitment, Error> {
+    pub fn commit(&self, polynomial: &Polynomial) -> Result<Commitment, Error> {
         // Check whether we can safely commit to this polynomial
         self.check_commit_degree_is_within_bounds(polynomial.degree())?;
 

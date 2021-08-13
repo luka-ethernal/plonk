@@ -11,15 +11,15 @@ use dusk_bls12_381::{BlsScalar, G1Affine};
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub struct VerifierKey {
-    pub(crate) q_lookup: Commitment,
-    pub(crate) table_1: Commitment,
-    pub(crate) table_2: Commitment,
-    pub(crate) table_3: Commitment,
-    pub(crate) table_4: Commitment,
+    pub q_lookup: Commitment,
+    pub table_1: Commitment,
+    pub table_2: Commitment,
+    pub table_3: Commitment,
+    pub table_4: Commitment,
 }
 
 impl VerifierKey {
-    pub(crate) fn compute_linearisation_commitment(
+    pub fn compute_linearisation_commitment(
         &self,
         lookup_separation_challenge: &BlsScalar,
         scalars: &mut Vec<BlsScalar>,

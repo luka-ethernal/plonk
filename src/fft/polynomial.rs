@@ -17,9 +17,9 @@ use dusk_bytes::{DeserializableSlice, Serializable};
 
 #[derive(Debug, Eq, PartialEq, Clone)]
 /// Represents a polynomial in coeffiient form.
-pub(crate) struct Polynomial {
+pub struct Polynomial {
     /// The coefficient of `x^i` is stored at location `i` in `self.coeffs`.
-    pub(crate) coeffs: Vec<BlsScalar>,
+    pub coeffs: Vec<BlsScalar>,
 }
 
 impl Deref for Polynomial {
@@ -38,18 +38,18 @@ impl DerefMut for Polynomial {
 
 impl Polynomial {
     /// Returns the zero polynomial.
-    pub(crate) const fn zero() -> Self {
+    pub const fn zero() -> Self {
         Self { coeffs: Vec::new() }
     }
 
     /// Checks if the given polynomial is zero.
-    pub(crate) fn is_zero(&self) -> bool {
+    pub fn is_zero(&self) -> bool {
         self.coeffs.is_empty()
             || self.coeffs.iter().all(|coeff| coeff == &BlsScalar::zero())
     }
 
     /// Constructs a new polynomial from a list of coefficients.
-    pub(crate) fn from_coefficients_slice(coeffs: &[BlsScalar]) -> Self {
+    pub fn from_coefficients_slice(coeffs: &[BlsScalar]) -> Self {
         Self::from_coefficients_vec(coeffs.to_vec())
     }
 
@@ -57,7 +57,7 @@ impl Polynomial {
     ///
     /// # Panics
     /// When the length of the coeffs is zero.
-    pub(crate) fn from_coefficients_vec(coeffs: Vec<BlsScalar>) -> Self {
+    pub fn from_coefficients_vec(coeffs: Vec<BlsScalar>) -> Self {
         let mut result = Self { coeffs };
         // While there are zeros at the end of the coefficient vector, pop them
         // off.
@@ -73,7 +73,7 @@ impl Polynomial {
     }
 
     /// Returns the degree of the [`Polynomial`].
-    pub(crate) fn degree(&self) -> usize {
+    pub fn degree(&self) -> usize {
         if self.is_zero() {
             return 0;
         }
@@ -95,7 +95,7 @@ impl Polynomial {
     }
 
     /// Evaluates a [`Polynomial`] at a given point in the field.
-    pub(crate) fn evaluate(&self, point: &BlsScalar) -> BlsScalar {
+    pub fn evaluate(&self, point: &BlsScalar) -> BlsScalar {
         if self.is_zero() {
             return BlsScalar::zero();
         }
@@ -408,10 +408,7 @@ mod test {
         /// This is only implemented for test purposes for now but inside of a
         /// `impl` block since it's used across multiple files in the
         /// repo.
-        pub(crate) fn rand<R: RngCore + CryptoRng>(
-            d: usize,
-            mut rng: &mut R,
-        ) -> Self {
+        pub fn rand<R: RngCore + CryptoRng>(d: usize, mut rng: &mut R) -> Self {
             let mut random_coeffs = Vec::with_capacity(d + 1);
             for _ in 0..=d {
                 random_coeffs.push(util::random_scalar(&mut rng));

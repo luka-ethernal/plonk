@@ -56,6 +56,6 @@ trace-print = ["trace"]
 canon = ["dusk-bls12_381/canon", "dusk-jubjub/canon", "canonical", "canonical_derive"]
 
 [[bench]]
-name="plonkup"
+name="granular_prover"
 harness=false
 

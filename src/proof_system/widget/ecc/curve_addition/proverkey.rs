@@ -9,12 +9,12 @@ use dusk_bls12_381::BlsScalar;
 use dusk_jubjub::EDWARDS_D;
 
 #[derive(Debug, Eq, PartialEq, Clone)]
-pub(crate) struct ProverKey {
-    pub(crate) q_variable_group_add: (Polynomial, Evaluations),
+pub struct ProverKey {
+    pub q_variable_group_add: (Polynomial, Evaluations),
 }
 
 impl ProverKey {
-    pub(crate) fn compute_quotient_i(
+    pub fn compute_quotient_i(
         &self,
         index: usize,
         curve_add_separation_challenge: &BlsScalar,
@@ -62,7 +62,7 @@ impl ProverKey {
         identity * q_variable_group_add_i * curve_add_separation_challenge
     }
 
-    pub(crate) fn compute_linearisation(
+    pub fn compute_linearisation(
         &self,
         curve_add_separation_challenge: &BlsScalar,
         a_eval: &BlsScalar,

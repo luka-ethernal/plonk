@@ -55,47 +55,47 @@ use hashbrown::HashMap;
 #[derive(Debug)]
 pub struct StandardComposer {
     /// Number of arithmetic gates in the circuit
-    pub(crate) n: usize,
+    pub n: usize,
 
     // Selector vectors
     /// Multiplier selector
-    pub(crate) q_m: Vec<BlsScalar>,
+    pub q_m: Vec<BlsScalar>,
     /// Left wire selector
-    pub(crate) q_l: Vec<BlsScalar>,
+    pub q_l: Vec<BlsScalar>,
     /// Right wire selector
-    pub(crate) q_r: Vec<BlsScalar>,
+    pub q_r: Vec<BlsScalar>,
     /// Output wire selector
-    pub(crate) q_o: Vec<BlsScalar>,
+    pub q_o: Vec<BlsScalar>,
     /// Fourth wire selector
-    pub(crate) q_4: Vec<BlsScalar>,
+    pub q_4: Vec<BlsScalar>,
     /// Constant wire selector
-    pub(crate) q_c: Vec<BlsScalar>,
+    pub q_c: Vec<BlsScalar>,
     /// Arithmetic wire selector
-    pub(crate) q_arith: Vec<BlsScalar>,
+    pub q_arith: Vec<BlsScalar>,
     /// Range selector
-    pub(crate) q_range: Vec<BlsScalar>,
+    pub q_range: Vec<BlsScalar>,
     /// Logic selector
-    pub(crate) q_logic: Vec<BlsScalar>,
+    pub q_logic: Vec<BlsScalar>,
     /// Fixed base group addition selector
-    pub(crate) q_fixed_group_add: Vec<BlsScalar>,
+    pub q_fixed_group_add: Vec<BlsScalar>,
     /// Variable base group addition selector
-    pub(crate) q_variable_group_add: Vec<BlsScalar>,
-    // Plookup gate wire selector
-    pub(crate) q_lookup: Vec<BlsScalar>,
+    pub q_variable_group_add: Vec<BlsScalar>,
+    /// Plookup gate wire selector
+    pub q_lookup: Vec<BlsScalar>,
 
     /// Sparse representation of the Public Inputs linking the positions of the
     /// non-zero ones to it's actual values.
-    pub(crate) public_inputs_sparse_store: BTreeMap<usize, BlsScalar>,
+    pub public_inputs_sparse_store: BTreeMap<usize, BlsScalar>,
 
     // Witness vectors
     /// Left wire witness vector.
-    pub(crate) w_l: Vec<Variable>,
+    pub w_l: Vec<Variable>,
     /// Right wire witness vector.
-    pub(crate) w_r: Vec<Variable>,
+    pub w_r: Vec<Variable>,
     /// Output wire witness vector.
-    pub(crate) w_o: Vec<Variable>,
+    pub w_o: Vec<Variable>,
     /// Fourth wire witness vector.
-    pub(crate) w_4: Vec<Variable>,
+    pub w_4: Vec<Variable>,
 
     /// Public lookup table
     pub lookup_table: PlookupTable4Arity,
@@ -104,13 +104,13 @@ pub struct StandardComposer {
     /// We reserve a variable to be zero in the system
     /// This is so that when a gate only uses three wires, we set the fourth
     /// wire to be the variable that references zero
-    pub(crate) zero_var: Variable,
+    pub zero_var: Variable,
 
     /// These are the actual variable values.
-    pub(crate) variables: HashMap<Variable, BlsScalar>,
+    pub variables: HashMap<Variable, BlsScalar>,
 
     /// Permutation argument.
-    pub(crate) perm: Permutation,
+    pub perm: Permutation,
 }
 
 impl StandardComposer {

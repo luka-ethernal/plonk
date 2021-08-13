@@ -9,13 +9,13 @@ use crate::fft::{Evaluations, Polynomial};
 use dusk_bls12_381::BlsScalar;
 
 #[derive(Debug, Eq, PartialEq, Clone)]
-pub(crate) struct ProverKey {
-    pub(crate) q_c: (Polynomial, Evaluations),
-    pub(crate) q_logic: (Polynomial, Evaluations),
+pub struct ProverKey {
+    pub q_c: (Polynomial, Evaluations),
+    pub q_logic: (Polynomial, Evaluations),
 }
 
 impl ProverKey {
-    pub(crate) fn compute_quotient_i(
+    pub fn compute_quotient_i(
         &self,
         index: usize,
         logic_separation_challenge: &BlsScalar,
@@ -54,7 +54,7 @@ impl ProverKey {
         q_logic_i * (c_3 + c_0 + c_1 + c_2 + c_4) * logic_separation_challenge
     }
 
-    pub(crate) fn compute_linearisation(
+    pub fn compute_linearisation(
         &self,
         logic_separation_challenge: &BlsScalar,
         a_eval: &BlsScalar,
@@ -95,7 +95,7 @@ impl ProverKey {
 }
 
 // Computes f(f-1)(f-2)(f-3)
-pub(crate) fn delta(f: BlsScalar) -> BlsScalar {
+pub fn delta(f: BlsScalar) -> BlsScalar {
     let f_1 = f - BlsScalar::one();
     let f_2 = f - BlsScalar::from(2);
     let f_3 = f - BlsScalar::from(3);
@@ -108,7 +108,7 @@ pub(crate) fn delta(f: BlsScalar) -> BlsScalar {
 // E = 3(a+b+c) - 2F
 // F = w[w(4w - 18(a+b) + 81) + 18(a^2 + b^2) - 81(a+b) + 83]
 #[allow(non_snake_case)]
-pub(crate) fn delta_xor_and(
+pub fn delta_xor_and(
     a: &BlsScalar,
     b: &BlsScalar,
     w: &BlsScalar,

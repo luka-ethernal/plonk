@@ -7,10 +7,10 @@
 use crate::commitment_scheme::kzg10::Commitment;
 
 #[derive(Debug, PartialEq, Eq, Copy, Clone)]
-pub(crate) struct VerifierKey {
-    pub(crate) q_l: Commitment,
-    pub(crate) q_r: Commitment,
-    pub(crate) q_fixed_group_add: Commitment,
+pub struct VerifierKey {
+    pub q_l: Commitment,
+    pub q_r: Commitment,
+    pub q_fixed_group_add: Commitment,
 }
 
 #[cfg(feature = "alloc")]
@@ -25,7 +25,7 @@ mod alloc {
     use dusk_jubjub::EDWARDS_D;
 
     impl VerifierKey {
-        pub(crate) fn compute_linearisation_commitment(
+        pub fn compute_linearisation_commitment(
             &self,
             ecc_separation_challenge: &BlsScalar,
             scalars: &mut Vec<BlsScalar>,

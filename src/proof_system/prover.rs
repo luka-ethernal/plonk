@@ -29,8 +29,8 @@ pub struct Prover {
     /// ProverKey which is used to create proofs about a specific plookup
     /// circuit
     pub prover_key: Option<ProverKey>,
-
-    pub(crate) cs: StandardComposer,
+    ///
+    pub cs: StandardComposer,
     /// Store the messages exchanged during the preprocessing stage
     /// This is copied each time, we make a proof
     pub preprocessed_transcript: Transcript,
@@ -123,7 +123,7 @@ impl Prover {
     }
 
     /// Convert variables to their actual witness values.
-    pub(crate) fn to_scalars(&self, vars: &[Variable]) -> Vec<BlsScalar> {
+    pub fn to_scalars(&self, vars: &[Variable]) -> Vec<BlsScalar> {
         vars.iter().map(|var| self.cs.variables[var]).collect()
     }
 

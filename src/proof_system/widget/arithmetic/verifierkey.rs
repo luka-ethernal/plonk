@@ -8,7 +8,7 @@ use crate::commitment_scheme::kzg10::Commitment;
 use dusk_bytes::{DeserializableSlice, Serializable};
 
 #[derive(Debug, PartialEq, Eq, Copy, Clone)]
-pub(crate) struct VerifierKey {
+pub struct VerifierKey {
     pub q_m: Commitment,
     pub q_l: Commitment,
     pub q_r: Commitment,
@@ -67,7 +67,7 @@ mod alloc {
     use dusk_bls12_381::{BlsScalar, G1Affine};
 
     impl VerifierKey {
-        pub(crate) fn compute_linearisation_commitment(
+        pub fn compute_linearisation_commitment(
             &self,
             scalars: &mut Vec<BlsScalar>,
             points: &mut Vec<G1Affine>,

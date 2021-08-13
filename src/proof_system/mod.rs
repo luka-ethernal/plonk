@@ -12,7 +12,8 @@ cfg_if::cfg_if!(
         /// Represents a PLONK Prover
         pub mod prover;
         pub use proof::alloc::*;
-        pub(crate) mod quotient_poly;
+        ///
+        pub mod quotient_poly;
         /// Represents a PLONK Verifier
         pub mod verifier;
         pub use prover::Prover;

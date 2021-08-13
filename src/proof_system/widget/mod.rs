@@ -21,21 +21,21 @@ use dusk_bytes::{DeserializableSlice, Serializable};
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub struct VerifierKey {
     /// Circuit size (not padded to a power of two).
-    pub(crate) n: usize,
+    pub n: usize,
     /// VerifierKey for arithmetic gates
-    pub(crate) arithmetic: arithmetic::VerifierKey,
+    pub arithmetic: arithmetic::VerifierKey,
     /// VerifierKey for logic gates
-    pub(crate) logic: logic::VerifierKey,
+    pub logic: logic::VerifierKey,
     /// VerifierKey for range gates
-    pub(crate) range: range::VerifierKey,
+    pub range: range::VerifierKey,
     /// VerifierKey for fixed base curve addition gates
-    pub(crate) fixed_base: ecc::scalar_mul::fixed_base::VerifierKey,
+    pub fixed_base: ecc::scalar_mul::fixed_base::VerifierKey,
     /// VerifierKey for variable base curve addition gates
-    pub(crate) variable_base: ecc::curve_addition::VerifierKey,
+    pub variable_base: ecc::curve_addition::VerifierKey,
     /// VerifierKey for lookup operations
-    pub(crate) lookup: lookup::VerifierKey,
+    pub lookup: lookup::VerifierKey,
     /// VerifierKey for permutation checks
-    pub(crate) permutation: permutation::VerifierKey,
+    pub permutation: permutation::VerifierKey,
 }
 
 impl Serializable<{ 20 * Commitment::SIZE + u64::SIZE }> for VerifierKey {
@@ -110,7 +110,7 @@ impl VerifierKey {
     /// Constructs a [`VerifierKey`] from the widget VerifierKey's that are
     /// constructed based on the selector polynomial commitments and the
     /// sigma polynomial commitments.
-    pub(crate) fn from_polynomial_commitments(
+    pub fn from_polynomial_commitments(
         n: usize,
         q_m: Commitment,
         q_l: Commitment,
@@ -183,7 +183,7 @@ impl VerifierKey {
 }
 
 #[cfg(feature = "alloc")]
-pub(crate) mod alloc {
+pub mod alloc {
     use super::*;
     use crate::{
         error::Error,
@@ -196,7 +196,7 @@ pub(crate) mod alloc {
 
     impl VerifierKey {
         /// Adds the circuit description to the transcript
-        pub(crate) fn seed_transcript(&self, transcript: &mut Transcript) {
+        pub fn seed_transcript(&self, transcript: &mut Transcript) {
             transcript.append_commitment(b"q_m", &self.arithmetic.q_m);
             transcript.append_commitment(b"q_l", &self.arithmetic.q_l);
             transcript.append_commitment(b"q_r", &self.arithmetic.q_r);
@@ -240,27 +240,28 @@ pub(crate) mod alloc {
     #[derive(Debug, PartialEq, Eq, Clone)]
     pub struct ProverKey {
         /// Circuit size
-        pub(crate) n: usize,
+        pub n: usize,
         /// ProverKey for arithmetic gate
-        pub(crate) arithmetic: arithmetic::ProverKey,
+        pub arithmetic: arithmetic::ProverKey,
         /// ProverKey for logic gate
-        pub(crate) logic: logic::ProverKey,
+        pub logic: logic::ProverKey,
         /// ProverKey for range gate
-        pub(crate) range: range::ProverKey,
+        pub range: range::ProverKey,
         /// ProverKey for fixed base curve addition gates
-        pub(crate) fixed_base: ecc::scalar_mul::fixed_base::ProverKey,
+        pub fixed_base: ecc::scalar_mul::fixed_base::ProverKey,
         /// ProverKey for variable base curve addition gates
-        pub(crate) variable_base: ecc::curve_addition::ProverKey,
+        pub variable_base: ecc::curve_addition::ProverKey,
         /// ProverKey for lookup gates
-        pub(crate) lookup: lookup::ProverKey,
+        pub lookup: lookup::ProverKey,
         /// ProverKey for permutation checks
-        pub(crate) permutation: permutation::ProverKey,
+        pub permutation: permutation::ProverKey,
         // Pre-processes the 4n Evaluations for the vanishing polynomial, so
         // they do not need to be computed at the proving stage.
         // Note: With this, we can combine all parts of the quotient polynomial
         // in their evaluation phase and divide by the quotient
         // polynomial without having to perform IFFT
-        pub(crate) v_h_coset_4n: Evaluations,
+        /// Vanishing polynomial evaluations
+        pub v_h_coset_4n: Evaluations,
     }
 
     #[cfg(feature = "alloc")]
@@ -630,7 +631,8 @@ pub(crate) mod alloc {
             Ok(prover_key)
         }
 
-        pub(crate) fn v_h_coset_4n(&self) -> &Evaluations {
+        ///
+        pub fn v_h_coset_4n(&self) -> &Evaluations {
             &self.v_h_coset_4n
         }
     }

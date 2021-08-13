@@ -16,7 +16,7 @@ use rayon::prelude::*;
 
 /// Computes the Quotient [`Polynomial`] given the [`EvaluationDomain`], a
 /// [`ProverKey`] and some other info.
-pub(crate) fn compute(
+pub fn compute(
     domain: &EvaluationDomain,
     prover_key: &ProverKey,
     z_poly: &Polynomial,
