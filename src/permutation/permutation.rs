@@ -87,11 +87,7 @@ impl Permutation {
         self.add_variable_to_map(d, fourth);
     }
 
-    pub fn add_variable_to_map(
-        &mut self,
-        var: Variable,
-        wire_data: WireData,
-    ) {
+    pub fn add_variable_to_map(&mut self, var: Variable, wire_data: WireData) {
         assert!(self.valid_variables(&[var]));
 
         // Since we always allocate space for the Vec of WireData when a

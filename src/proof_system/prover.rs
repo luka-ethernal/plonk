@@ -87,7 +87,7 @@ impl Prover {
     }
 
     /// Split `t(X)` poly into 4 degree `n` polynomials.
-    pub(crate) fn split_tx_poly(
+    pub fn split_tx_poly(
         &self,
         n: usize,
         t_x: &Polynomial,
@@ -101,7 +101,7 @@ impl Prover {
     }
 
     /// Computes the quotient Opening [`Polynomial`].
-    fn compute_quotient_opening_poly(
+    pub fn compute_quotient_opening_poly(
         n: usize,
         t_1_poly: &Polynomial,
         t_2_poly: &Polynomial,
@@ -592,7 +592,7 @@ impl Prover {
 }
 
 /// Computes the quotient opening polynomial.
-pub(crate) fn compute_quotient_opening_poly(
+pub fn compute_quotient_opening_poly(
     n: usize,
     t_1_poly: &Polynomial,
     t_2_poly: &Polynomial,
@@ -611,17 +611,4 @@ pub(crate) fn compute_quotient_opening_poly(
     let d = t_4_poly * &z_three_n;
     let abc = &(a + &b) + &c;
     &abc + &d
-}
-
-/// Split `t(X)` poly into 4 degree `n` polynomials.
-pub(crate) fn split_tx_poly(
-    n: usize,
-    t_x: &Polynomial,
-) -> (Polynomial, Polynomial, Polynomial, Polynomial) {
-    (
-        Polynomial::from_coefficients_vec(t_x[0..n].to_vec()),
-        Polynomial::from_coefficients_vec(t_x[n..2 * n].to_vec()),
-        Polynomial::from_coefficients_vec(t_x[2 * n..3 * n].to_vec()),
-        Polynomial::from_coefficients_vec(t_x[3 * n..].to_vec()),
-    )
 }

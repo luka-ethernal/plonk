@@ -172,7 +172,7 @@ impl CommitKey {
     /// taking a random linear combination of the individual witnesses.
     /// We apply the same optimisation mentioned in when computing each witness;
     /// removing f(z).
-    pub(crate) fn compute_aggregate_witness(
+    pub fn compute_aggregate_witness(
         &self,
         polynomials: &[Polynomial],
         point: &BlsScalar,

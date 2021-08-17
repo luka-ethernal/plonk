@@ -16,7 +16,9 @@ use dusk_plonk::error::Error;
 use dusk_plonk::fft::{EvaluationDomain, Polynomial};
 use dusk_plonk::plookup::MultiSet;
 use dusk_plonk::prelude::{CommitKey, PublicParameters};
-use dusk_plonk::proof_system::{Proof, Prover, ProverKey, quotient_poly};
+use dusk_plonk::proof_system::{
+    linearisation_poly, quotient_poly, Proof, Prover, ProverKey,
+};
 use dusk_plonk::transcript::TranscriptProtocol;
 use merlin::Transcript;
 
@@ -254,11 +256,14 @@ fn compute_pi_poly(domain: EvaluationDomain, prover: &Prover) {
     );
 }
 
-fn conc_and_sort(compressed_t_multiset: &MultiSet, compressed_f_multiset: &MultiSet) {
+fn conc_and_sort(
+    compressed_t_multiset: &MultiSet,
+    compressed_f_multiset: &MultiSet,
+) {
     // Compute s, as the sorted and concatenated version of f and t
     let s = compressed_t_multiset
-    .sorted_concat(&compressed_f_multiset)
-    .unwrap();
+        .sorted_concat(&compressed_f_multiset)
+        .unwrap();
 }
 
 fn halve_alternating(s: &MultiSet) {
@@ -266,15 +271,23 @@ fn halve_alternating(s: &MultiSet) {
     let (h_1, h_2) = s.halve_alternating();
 }
 
-fn compute_h1_h2_poly(domain: EvaluationDomain, h_1: &MultiSet, h_2: &MultiSet) {
+fn compute_h1_h2_poly(
+    domain: EvaluationDomain,
+    h_1: &MultiSet,
+    h_2: &MultiSet,
+) {
     // Compute h polys
     let h_1_poly =
-    Polynomial::from_coefficients_vec(domain.ifft(&h_1.0.as_slice()));
+        Polynomial::from_coefficients_vec(domain.ifft(&h_1.0.as_slice()));
     let h_2_poly =
-    Polynomial::from_coefficients_vec(domain.ifft(&h_2.0.as_slice()));
+        Polynomial::from_coefficients_vec(domain.ifft(&h_2.0.as_slice()));
 }
 
-fn commit_h1_h2_poly(commit_key: &CommitKey, h_1_poly: &Polynomial, h_2_poly: &Polynomial) {
+fn commit_h1_h2_poly(
+    commit_key: &CommitKey,
+    h_1_poly: &Polynomial,
+    h_2_poly: &Polynomial,
+) {
     // Commit to h polys
     let h_1_poly_commit = commit_key.commit(&h_1_poly).unwrap();
     let h_2_poly_commit = commit_key.commit(&h_2_poly).unwrap();
@@ -360,7 +373,186 @@ fn compute_quotient_poly(
             var_base_sep_challenge,
             lookup_sep_challenge,
         ),
-    ).unwrap();
+    )
+    .unwrap();
+}
+
+fn split_quotient(size: usize, prover: &Prover, t_poly: &Polynomial) {
+    let (t_1_poly, t_2_poly, t_3_poly, t_4_poly) =
+        prover.split_tx_poly(size, &t_poly);
+}
+
+fn commit_quotient_pieces(
+    commit_key: &CommitKey,
+    t_1_poly: &Polynomial,
+    t_2_poly: &Polynomial,
+    t_3_poly: &Polynomial,
+    t_4_poly: &Polynomial,
+) {
+    // Commit to splitted quotient polynomial
+    let t_1_commit = commit_key.commit(&t_1_poly).unwrap();
+    let t_2_commit = commit_key.commit(&t_2_poly).unwrap();
+    let t_3_commit = commit_key.commit(&t_3_poly).unwrap();
+    let t_4_commit = commit_key.commit(&t_4_poly).unwrap();
+}
+
+fn compute_linearization(
+    domain: &EvaluationDomain,
+    prover_key: &ProverKey,
+    alpha: BlsScalar,
+    beta: BlsScalar,
+    gamma: BlsScalar,
+    delta: BlsScalar,
+    epsilon: BlsScalar,
+    zeta: BlsScalar,
+    range_sep_challenge: BlsScalar,
+    logic_sep_challenge: BlsScalar,
+    fixed_base_sep_challenge: BlsScalar,
+    var_base_sep_challenge: BlsScalar,
+    lookup_sep_challenge: BlsScalar,
+    z_challenge: BlsScalar,
+    w_l_poly: &Polynomial,
+    w_r_poly: &Polynomial,
+    w_o_poly: &Polynomial,
+    w_4_poly: &Polynomial,
+    t_poly: &Polynomial,
+    z_poly: &Polynomial,
+    f_poly: &Polynomial,
+    h_1_poly: &Polynomial,
+    h_2_poly: &Polynomial,
+    table_poly: &Polynomial,
+    p_poly: &Polynomial,
+) {
+    let (lin_poly, evaluations) = linearisation_poly::compute(
+        &domain,
+        &prover_key,
+        &(
+            alpha,
+            beta,
+            gamma,
+            delta,
+            epsilon,
+            zeta,
+            range_sep_challenge,
+            logic_sep_challenge,
+            fixed_base_sep_challenge,
+            var_base_sep_challenge,
+            lookup_sep_challenge,
+            z_challenge,
+        ),
+        &w_l_poly,
+        &w_r_poly,
+        &w_o_poly,
+        &w_4_poly,
+        &t_poly,
+        &z_poly,
+        &f_poly,
+        &h_1_poly,
+        &h_2_poly,
+        &table_poly,
+        &p_poly,
+    );
+}
+
+fn compute_quotient_opening_poly(
+    n: usize,
+    t_1_poly: &Polynomial,
+    t_2_poly: &Polynomial,
+    t_3_poly: &Polynomial,
+    t_4_poly: &Polynomial,
+    z_challenge: BlsScalar,
+) {
+    // 5. Compute Openings using KZG10
+    //
+    // We merge the quotient polynomial using the `z_challenge` so the SRS
+    // is linear in the circuit size `n`
+    let quot = Prover::compute_quotient_opening_poly(
+        n,
+        &t_1_poly,
+        &t_2_poly,
+        &t_3_poly,
+        &t_4_poly,
+        &z_challenge,
+    );
+}
+
+fn compute_aggregate_witness(
+    commit_key: &CommitKey,
+    quot: Polynomial,
+    lin_poly: Polynomial,
+    w_l_poly: Polynomial,
+    w_r_poly: Polynomial,
+    w_o_poly: Polynomial,
+    w_4_poly: Polynomial,
+    left_sigma: Polynomial,
+    right_sigma: Polynomial,
+    out_sigma: Polynomial,
+    f_poly: Polynomial,
+    h_1_poly: Polynomial,
+    h_2_poly: Polynomial,
+    table_poly: Polynomial,
+    z_challenge: BlsScalar,
+    transcript: &mut Transcript,
+) {
+    // Compute aggregate witness to polynomials evaluated at the evaluation
+    // challenge `z`
+    let aggregate_witness = commit_key.compute_aggregate_witness(
+        &[
+            quot,
+            lin_poly,
+            w_l_poly,
+            w_r_poly,
+            w_o_poly,
+            w_4_poly,
+            left_sigma,
+            right_sigma,
+            out_sigma,
+            f_poly,
+            h_1_poly,
+            h_2_poly,
+            table_poly,
+        ],
+        &z_challenge,
+        transcript,
+    );
+}
+
+fn commit_aggregate_witness(
+    commit_key: &CommitKey,
+    aggregate_witness: &Polynomial,
+) {
+    let w_z_comm = commit_key.commit(&aggregate_witness).unwrap();
+}
+
+fn compute_shifted_aggregate_witness(
+    commit_key: &CommitKey,
+    z_poly: Polynomial,
+    w_l_poly: Polynomial,
+    w_r_poly: Polynomial,
+    w_4_poly: Polynomial,
+    h_1_poly: Polynomial,
+    p_poly: Polynomial,
+    table_poly: Polynomial,
+    z_challenge: BlsScalar,
+    group_gen: BlsScalar,
+    transcript: &mut Transcript,
+) {
+    // Compute aggregate witness to polynomials evaluated at the shifted
+    // evaluation challenge
+    let shifted_aggregate_witness = commit_key.compute_aggregate_witness(
+        &[
+            z_poly, w_l_poly, w_r_poly, w_4_poly, h_1_poly, p_poly, table_poly,
+        ],
+        &(z_challenge * group_gen),
+        transcript,
+    );
+}
+
+fn commit_shifted_aggregate_witness(
+    commit_key: &CommitKey,
+    shifted_aggregate_witness: &Polynomial,
+) {
+    let w_zx_comm = commit_key.commit(&shifted_aggregate_witness).unwrap();
 }
 
 fn bench(c: &mut Criterion) {
@@ -599,6 +791,7 @@ fn bench(c: &mut Criterion) {
     /* ----- NOT BENCHMARKED ----- */
     // Add f_poly commitment to transcript
     transcript.append_commitment(b"f", &f_poly_commit);
+    /* --------------------------- */
 
     // 2. Compute permutation polynomial
     //
@@ -613,17 +806,12 @@ fn bench(c: &mut Criterion) {
     /* ---------------------------- */
 
     c.bench_function("Compute Wire Permutation Polynomial", |b| {
-        b.iter(|| compute_plonk_perm(
-            &prover,
-            prover_key,
-            domain,
-            w_l_scalar,
-            w_r_scalar,
-            w_o_scalar,
-            w_4_scalar,
-            beta,
-            gamma,
-        ))
+        b.iter(|| {
+            compute_plonk_perm(
+                &prover, prover_key, domain, w_l_scalar, w_r_scalar,
+                w_o_scalar, w_4_scalar, beta, gamma,
+            )
+        })
     });
 
     let z_poly = Polynomial::from_coefficients_slice(
@@ -674,13 +862,10 @@ fn bench(c: &mut Criterion) {
 
     // Compute s, as the sorted and concatenated version of f and t
     let s = compressed_t_multiset
-    .sorted_concat(&compressed_f_multiset)
-    .unwrap();
+        .sorted_concat(&compressed_f_multiset)
+        .unwrap();
 
-    c.bench_function("Halve multiset", |
-    b| {
-        b.iter(|| halve_alternating(&s))
-    });
+    c.bench_function("Halve multiset", |b| b.iter(|| halve_alternating(&s)));
 
     // Compute first and second halves of s, as h_1 and h_2
     let (h_1, h_2) = s.halve_alternating();
@@ -708,16 +893,18 @@ fn bench(c: &mut Criterion) {
     transcript.append_commitment(b"h2", &h_2_poly_commit);
 
     c.bench_function("Compute lookup permutation polynomial", |b| {
-        b.iter(|| compute_lookup_perm(
-            domain,
-            &prover,
-            &compressed_f_multiset,
-            &compressed_t_multiset,
-            &h_1,
-            &h_2,
-            delta,
-            epsilon,
-        ))
+        b.iter(|| {
+            compute_lookup_perm(
+                domain,
+                &prover,
+                &compressed_f_multiset,
+                &compressed_t_multiset,
+                &h_1,
+                &h_2,
+                delta,
+                epsilon,
+            )
+        })
     });
 
     // Compute lookup permutation poly
@@ -741,10 +928,10 @@ fn bench(c: &mut Criterion) {
     //
     let p_poly_commit = ck.commit(&p_poly).unwrap();
 
-
     /* ----- NOT BENCHMARKED ----- */
     // Add permutation polynomial commitment to transcript
     transcript.append_commitment(b"p", &p_poly_commit);
+    /* --------------------------- */
 
     // 4. Compute quotient polynomial
     //
@@ -758,37 +945,38 @@ fn bench(c: &mut Criterion) {
         transcript.challenge_scalar(b"fixed base separation challenge");
     let var_base_sep_challenge =
         transcript.challenge_scalar(b"variable base separation challenge");
-    let lookup_sep_challenge =
-        transcript.challenge_scalar(b"lookup challenge");
+    let lookup_sep_challenge = transcript.challenge_scalar(b"lookup challenge");
     /* ---------------------------- */
 
     c.bench_function("Compute quotient polynomial", |b| {
-        b.iter(|| compute_quotient_poly(
-            domain,
-            &prover_key,
-            &z_poly,
-            &p_poly,
-            &w_l_poly,
-            &w_r_poly,
-            &w_o_poly,
-            &w_4_poly,
-            &f_poly,
-            &table_poly,
-            &h_1_poly,
-            &h_2_poly,
-            &pi_poly,
-            alpha,
-            beta,
-            gamma,
-            delta,
-            epsilon,
-            zeta,
-            range_sep_challenge,
-            logic_sep_challenge,
-            fixed_base_sep_challenge,
-            var_base_sep_challenge,
-            lookup_sep_challenge,
-        ))
+        b.iter(|| {
+            compute_quotient_poly(
+                domain,
+                &prover_key,
+                &z_poly,
+                &p_poly,
+                &w_l_poly,
+                &w_r_poly,
+                &w_o_poly,
+                &w_4_poly,
+                &f_poly,
+                &table_poly,
+                &h_1_poly,
+                &h_2_poly,
+                &pi_poly,
+                alpha,
+                beta,
+                gamma,
+                delta,
+                epsilon,
+                zeta,
+                range_sep_challenge,
+                logic_sep_challenge,
+                fixed_base_sep_challenge,
+                var_base_sep_challenge,
+                lookup_sep_challenge,
+            )
+        })
     });
 
     let t_poly = quotient_poly::compute(
@@ -815,9 +1003,255 @@ fn bench(c: &mut Criterion) {
             var_base_sep_challenge,
             lookup_sep_challenge,
         ),
+    )
+    .unwrap();
+
+    c.bench_function("Split quotient polynomial", |b| {
+        b.iter(|| split_quotient(domain.size(), &prover, &t_poly))
+    });
+
+    // Split quotient polynomial into 4 degree `n` polynomials
+    let (t_1_poly, t_2_poly, t_3_poly, t_4_poly) =
+        prover.split_tx_poly(domain.size(), &t_poly);
+
+    c.bench_function("Commit to splitted polynomials", |b| {
+        b.iter(|| {
+            commit_quotient_pieces(
+                &ck, &t_1_poly, &t_2_poly, &t_3_poly, &t_4_poly,
+            )
+        })
+    });
+
+    // Commit to splitted quotient polynomial
+    let t_1_commit = ck.commit(&t_1_poly).unwrap();
+    let t_2_commit = ck.commit(&t_2_poly).unwrap();
+    let t_3_commit = ck.commit(&t_3_poly).unwrap();
+    let t_4_commit = ck.commit(&t_4_poly).unwrap();
+
+    /* ----- NOT BENCHMARKED ----- */
+    // Add quotient polynomial commitments to transcript
+    transcript.append_commitment(b"t_1", &t_1_commit);
+    transcript.append_commitment(b"t_2", &t_2_commit);
+    transcript.append_commitment(b"t_3", &t_3_commit);
+    transcript.append_commitment(b"t_4", &t_4_commit);
+    /* --------------------------- */
+
+    c.bench_function("Compute linearization polynomial", |b| {
+        b.iter(|| {
+            compute_linearization(
+                &domain,
+                &prover_key,
+                alpha,
+                beta,
+                gamma,
+                delta,
+                epsilon,
+                zeta,
+                range_sep_challenge,
+                logic_sep_challenge,
+                fixed_base_sep_challenge,
+                var_base_sep_challenge,
+                lookup_sep_challenge,
+                z_challenge,
+                &w_l_poly,
+                &w_r_poly,
+                &w_o_poly,
+                &w_4_poly,
+                &t_poly,
+                &z_poly,
+                &f_poly,
+                &h_1_poly,
+                &h_2_poly,
+                &table_poly,
+                &p_poly,
+            )
+        })
+    });
+
+    let (lin_poly, evaluations) = linearisation_poly::compute(
+        &domain,
+        &prover_key,
+        &(
+            alpha,
+            beta,
+            gamma,
+            delta,
+            epsilon,
+            zeta,
+            range_sep_challenge,
+            logic_sep_challenge,
+            fixed_base_sep_challenge,
+            var_base_sep_challenge,
+            lookup_sep_challenge,
+            z_challenge,
+        ),
+        &w_l_poly,
+        &w_r_poly,
+        &w_o_poly,
+        &w_4_poly,
+        &t_poly,
+        &z_poly,
+        &f_poly,
+        &h_1_poly,
+        &h_2_poly,
+        &table_poly,
+        &p_poly,
     );
 
+    /* ----- NOT BENCHMARKED ----- */
+    // Add evaluations to transcript
+    transcript.append_scalar(b"a_eval", &evaluations.proof.a_eval);
+    transcript.append_scalar(b"b_eval", &evaluations.proof.b_eval);
+    transcript.append_scalar(b"c_eval", &evaluations.proof.c_eval);
+    transcript.append_scalar(b"d_eval", &evaluations.proof.d_eval);
+    transcript.append_scalar(b"a_next_eval", &evaluations.proof.a_next_eval);
+    transcript.append_scalar(b"b_next_eval", &evaluations.proof.b_next_eval);
+    transcript.append_scalar(b"d_next_eval", &evaluations.proof.d_next_eval);
+    transcript
+        .append_scalar(b"left_sig_eval", &evaluations.proof.left_sigma_eval);
+    transcript
+        .append_scalar(b"right_sig_eval", &evaluations.proof.right_sigma_eval);
+    transcript
+        .append_scalar(b"out_sig_eval", &evaluations.proof.out_sigma_eval);
+    transcript.append_scalar(b"q_arith_eval", &evaluations.proof.q_arith_eval);
+    transcript.append_scalar(b"q_c_eval", &evaluations.proof.q_c_eval);
+    transcript.append_scalar(b"q_l_eval", &evaluations.proof.q_l_eval);
+    transcript.append_scalar(b"q_r_eval", &evaluations.proof.q_r_eval);
+    transcript
+        .append_scalar(b"q_lookup_eval", &evaluations.proof.q_lookup_eval);
+    transcript.append_scalar(b"perm_eval", &evaluations.proof.perm_eval);
+    transcript.append_scalar(
+        b"lookup_perm_eval",
+        &evaluations.proof.lookup_perm_eval,
+    );
+    transcript.append_scalar(b"h_1_eval", &evaluations.proof.h_1_eval);
+    transcript
+        .append_scalar(b"h_1_next_eval", &evaluations.proof.h_1_next_eval);
+    transcript.append_scalar(b"h_2_eval", &evaluations.proof.h_2_eval);
+    transcript.append_scalar(b"t_eval", &evaluations.quot_eval);
+    transcript.append_scalar(b"r_eval", &evaluations.proof.lin_poly_eval);
+    /* --------------------------- */
+
+    c.bench_function("Compute quotient opening poly", |b| {
+        b.iter(|| {
+            compute_quotient_opening_poly(
+                domain.size(),
+                &t_1_poly,
+                &t_2_poly,
+                &t_3_poly,
+                &t_4_poly,
+                z_challenge,
+            )
+        })
+    });
+
+    // 5. Compute Openings using KZG10
+    //
+    // We merge the quotient polynomial using the `z_challenge` so the SRS
+    // is linear in the circuit size `n`
+    let quot = Prover::compute_quotient_opening_poly(
+        domain.size(),
+        &t_1_poly,
+        &t_2_poly,
+        &t_3_poly,
+        &t_4_poly,
+        &z_challenge,
+    );
+
+    // Compute aggregate witness to polynomials evaluated at the evaluation
+    // challenge `z`
+    let aggregate_witness = ck.compute_aggregate_witness(
+        &[
+            quot.clone(),
+            lin_poly.clone(),
+            w_l_poly.clone(),
+            w_r_poly.clone(),
+            w_o_poly.clone(),
+            w_4_poly.clone(),
+            prover_key.permutation.left_sigma.0.clone(),
+            prover_key.permutation.right_sigma.0.clone(),
+            prover_key.permutation.out_sigma.0.clone(),
+            f_poly.clone(),
+            h_1_poly.clone(),
+            h_2_poly.clone(),
+            table_poly.clone(),
+        ],
+        &z_challenge,
+        &mut transcript,
+    );
+
+    c.bench_function("Compute aggregate witness", |b| {
+        b.iter(|| {
+            compute_aggregate_witness(
+                &ck,
+                quot.clone(),
+                lin_poly.clone(),
+                w_l_poly.clone(),
+                w_r_poly.clone(),
+                w_o_poly.clone(),
+                w_4_poly.clone(),
+                prover_key.permutation.left_sigma.0.clone(),
+                prover_key.permutation.right_sigma.0.clone(),
+                prover_key.permutation.out_sigma.0.clone(),
+                f_poly.clone(),
+                h_1_poly.clone(),
+                h_2_poly.clone(),
+                table_poly.clone(),
+                z_challenge,
+                &mut transcript,
+            )
+        })
+    });
+
+    let w_z_comm = ck.commit(&aggregate_witness).unwrap();
+
+    c.bench_function("Commit to aggregate witness", |b| {
+        b.iter(|| commit_aggregate_witness(&ck, &aggregate_witness))
+    });
+
+    // Compute aggregate witness to polynomials evaluated at the shifted
+    // evaluation challenge
+    let shifted_aggregate_witness = ck.compute_aggregate_witness(
+        &[
+            z_poly.clone(),
+            w_l_poly.clone(),
+            w_r_poly.clone(),
+            w_4_poly.clone(),
+            h_1_poly.clone(),
+            p_poly.clone(),
+            table_poly.clone(),
+        ],
+        &(z_challenge * domain.group_gen),
+        &mut transcript,
+    );
+
+    c.bench_function("Compute shifted aggregate witness", |b| {
+        b.iter(|| {
+            compute_shifted_aggregate_witness(
+                &ck,
+                z_poly.clone(),
+                w_l_poly.clone(),
+                w_r_poly.clone(),
+                w_4_poly.clone(),
+                h_1_poly.clone(),
+                p_poly.clone(),
+                table_poly.clone(),
+                z_challenge,
+                domain.group_gen,
+                &mut transcript,
+            )
+        })
+    });
+
+    let w_zx_comm = ck.commit(&shifted_aggregate_witness).unwrap();
+
+    c.bench_function("Commit to shifted aggregate witness", |b| {
+        b.iter(|| {
+            commit_shifted_aggregate_witness(&ck, &shifted_aggregate_witness)
+        })
+    });
 }
+
 ///
 criterion_group! {
     name = benches;

@@ -27,4 +27,4 @@ cfg_if::cfg_if!(
 /// Represents PLONK Proof
 pub mod proof;
 pub use proof::Proof;
-pub(crate) mod linearisation_poly;
+pub mod linearisation_poly;
