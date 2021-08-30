@@ -672,7 +672,7 @@ impl StandardComposer {
     }
 
     /// Shows knowledge of a blake2s preimage of a hash
-    fn blake2s_preimage(&mut self, preimage: BlsScalar, hash: BlsScalar) {
+    pub fn blake2s_preimage(&mut self, preimage: BlsScalar, hash: BlsScalar) {
         let preimage_vars = self.scalar_to_nibble_vars(preimage);
         let circuit_result_vars = self.blake2s_256(preimage_vars);
         let circuit_result = self.compose_scalar_from_le_nibbles(&circuit_result_vars);
@@ -854,88 +854,7 @@ mod tests {
                 prover.prove(&ck).unwrap();     
             }
         }
-/*
-        #[test]
-        #[ignore]
-        fn test_blake2s_preimage_prove_verify() {
-            use super::super::helper::*;
-            use std::convert::TryInto;
-            use crate::commitment_scheme::kzg10::PublicParameters;
-            use std::fs::File;
-            use std::io;
-            use std::io::prelude::*;
-            use std::vec::Vec;
-    
-            unsafe {
-                let mut file = File::open("blake2s_setup").unwrap();
-                let mut buffer = Vec::new();
-                file.read_to_end(&mut buffer).unwrap();
-    
-                let public_parameters = PublicParameters::from_slice_unchecked(&buffer);//.unwrap();
-    
-                let (proof, lookup_table) = {
-                    // Create a prover struct
-                    let mut prover = Prover::new(b"blake2s");
-            
-                    // Additionally key the transcript
-                    prover.key_transcript(b"key", b"additional seed information");
-            
-                    // prover's secret preimage
-                    let preimage = BlsScalar::zero();
-    
-                    // blake2s hash of 256-bits of zeros
-                    let hash_bytes: [u8; 64] = [
-                        0x32, 0x0b, 0x5e, 0xa9, 0x9e, 0x65, 0x3b, 0xc2, 0xb5, 0x93, 0xdb, 0x41, 0x30,
-                        0xd1, 0x0a, 0x4e, 0xfd, 0x3a, 0x0b, 0x4c, 0xc2, 0xe1, 0xa6, 0x67, 0x2b, 0x67,
-                        0x8d, 0x71, 0xdf, 0xbd, 0x33, 0xad, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                    ];
 
-                    let hash = hash_bytes.iter().rev().fold(BlsScalar::zero(), |acc, x| BlsScalar::from(256)*acc + BlsScalar::from(*x as u64));
-
-                    prover.cs.generate_blake_table();
-
-                    prover.cs.blake2s_preimage(preimage, hash);
-
-                    // Commit Key
-                    let (ck, _) = public_parameters
-                        .trim(prover.cs.total_size().next_power_of_two())
-                        .unwrap();
-    
-                    // Preprocess circuit
-                    prover.preprocess(&ck).unwrap();
-
-                    // Compute Proof
-                    (prover.prove(&ck).unwrap(), public_inputs, lookup_table)
-                };
-    
-                    // Verifiers view
-                    //
-                    // Create a Verifier object
-                    let mut verifier = Verifier::new(b"blake2s");
-    
-                    // Additionally key the transcript
-                    verifier.key_transcript(b"key", b"additional seed information");
-    
-                    // Add circuit to verifier's composer
-                    verifier.cs.blake2s_preimage(BlsScalar::zero(), BlsScalar::zero());
-    
-                    // Compute Commit and Verifier Key
-                    let (ck, vk) = public_parameters
-                        .trim(verifier.cs.total_size().next_power_of_two())
-                        .unwrap();
-    
-                    // Preprocess circuit
-                    verifier.preprocess(&ck).unwrap();
-    
-                    // Verify proof
-                    let res = verifier.verify(&proof, &vk, &public_inputs);
-    
-                    assert!(res.is_ok());
-            }
-        }
-*/
     #[test]
     fn test_blake2s_hash() {
         use std::convert::TryInto;
