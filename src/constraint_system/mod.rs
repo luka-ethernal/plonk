@@ -11,6 +11,7 @@
 pub(crate) mod composer;
 pub(crate) mod divide_w_recip;
 pub(crate) mod variable;
+pub(crate) mod blake2s_4bit;
 
 /// Simple Arithmetic gates
 mod arithmetic;
