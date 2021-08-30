@@ -18,7 +18,7 @@ pub struct Verifier {
     /// VerificationKey which is used to verify a specific Plookup circuit
     pub verifier_key: Option<VerifierKey>,
 
-    pub(crate) cs: StandardComposer,
+    pub cs: StandardComposer,
     /// Store the messages exchanged during the preprocessing stage
     /// This is copied each time, we make a proof, so that we can use the same
     /// verifier to Verify multiple proofs from the same circuit. If this
