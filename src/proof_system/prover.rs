@@ -585,7 +585,7 @@ impl Prover {
         let proof = self.prove_with_preprocessed(commit_key, prover_key)?;
 
         // Clear witness and reset composer variables
-        self.clear_witness();
+        //self.clear_witness();
 
         Ok(proof)
     }
