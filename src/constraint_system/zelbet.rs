@@ -80,10 +80,12 @@ impl StandardComposer {
             );
         });
 
+        let output = self.add((BlsScalar::one(), acc), (-BlsScalar::one(), x), BlsScalar::zero(), None);
+
         self.constrain_to_constant(
-            acc,
-            self.variables[&x],
-            Some(BlsScalar::zero()),
+            output,
+            BlsScalar::zero(),
+            None,
         );
 
         (nibbles_mont, nibbles_reduced)
