@@ -88,124 +88,59 @@ With these specific bases, we can derive the relation between all sets of
 equations into one single polynomial equation, where we have a vector of inputs 
 to each gate type:
 
-&emsp; *Q<sub>L</sub>xa(x)* + *Q<sub>R</sub>(x)b(x)* + *Q<sub>O</sub>(x)c(x)* + *Q<sub>M</sub>(x)a(x)b(x)* + *Q<sub>R</sub>(x)* = 0
+&emsp; *Q<sub>L</sub>(x)a(x)* + *Q<sub>R</sub>(x)b(x)* + *Q<sub>O</sub>(x)c(x)* + *Q<sub>M</sub>(x)a(x)b(x)* + *Q<sub>R</sub>(x)* = 0
 
-The utility for this in PLONK, 
-as a univeral SNARK, is that 
-any operation or relationship 
-that holds with the inputted 
-vectors, will also hold over 
-the polynomial.
+The utility for this in PLONK, as a universal SNARK, is that any operation or 
+relationship that holds with the inputted vectors, will also hold over the 
+polynomial.
 
-In order to check this in PLONK, 
-a 'vanishing polynomial' is 
-introduced. Which is just a 
-polynomial equal to zero for
-all the points we evaluate at.
-So this means that the vectors
-will be divisible by this vanishing
-polynomial, if the expression we 
-check does indeed hold. 
+In order to check this in PLONK, a 'vanishing polynomial' is introduced. Which 
+is just a polynomial equal to zero forall the points we evaluate at. So this 
+means that the vectors will be divisible by this vanishing polynomial, if the 
+expression we check does indeed hold.
 
-To summarise what the PLONK
-proof must satisfy:
+To summarize what the PLONK proof must satisfy:
 
-The generation of copy and 
-gate constraints where the 
-former are representative 
-of permuted wires. Generate 
-all of the polynomials to  
-be checked against the 
-vanishing polynomials.
-Take all of the wire values
-and convert them into three
-polynomials, \\({\mathbf A}(z)\\), 
-\\({\mathbf B}(z)\\), 
-\\({\mathbf C}(z)\\). 
-Check the polynomials at 
-some random \\({\mathbf Z\_z}\\), by making
-commitments and checking 
-the evaluation form. 
-Then commit all evalution 
-polynomials forms for the 
-verfier. 
+The generation of copy and gate constraints where the former are representative 
+of permuted wires. Generate all of the polynomials to be checked against the 
+vanishing polynomials.Take all of the wire values and convert them into three 
+polynomials, *A(z)*, *B(z)* and *C(z)*. Check the polynomials at some random 
+*Z<sub>z</sub>*, by making commitments and checking the evaluation form. Then 
+commit all evaluation polynomials forms for the verifier.
 
+# Lagrange Polynomials
 
+The use of polynomials in the PLONK proving scheme refers to specific 
+evaluation domains,named Lagrange polynomials, based on interpolation of two 
+functions of particular group elements. The following section gives a more 
+comprehensive understanding to the way in which these polynomials are formed, 
+given certain inputs.
 
+Lagrange polynomials are introduced as a means of constructing continuos 
+functions from discrete data. With alternative polynomial constructions, 
+discrete data sets can be approximated; Lagrange polynomials, however, form a 
+solution that fits data exactly. This is achieved through **interpolation**, 
+which finds a linear combination of 'n' inputted functions with respect to a 
+given data set which imposes 'n' constraints and computes an exact fitting 
+solution. 
 
+Linear Algebra dictates that the interpolation polynomial ought to be formed 
+from the system *A(x)* = *b*, where *b<sub>i</sub>* = *y<sub>i</sub>*, 
+*i* = 0,..,*n* and the entries of *A(x)* are defined by 
+*a<sub>ij</sub* = *P(x<sub>i</sub>*, and *i*,*j* &isin; 0,..,*n*.
+Additionally, the used points for the interpolation are 
+*x<sub>0</sub>*,*x<sub>1</sub>*,..,*x<sub>n</sub>*, from which the data points
+*y<sub>0</sub>*,*y<sub>1</sub>*,..,*y<sub>n</sub>* are obtained and 
+*P<sub>j</sub>(x<sub>i</sub>)* = *x<sup>j</sup>*, with *i* &isin; 0,..,*n*.
+The basis 1,*x<sup>1</sup>*,*x<sup>2</sup>*,..,*x<sup>n</sup>* of the space of 
+polynomials with degree *n+1* is called the **monomial basis** and the 
+corresponding matrix *A* is called the **Vandermonde matrix** for the points 
+*x<sub>0</sub>*,*x<sub>1</sub>*,..,*x<sub>n</sub>*.
 
-
-
-
-
-Lagrangian polynomials
-======================
-
-The use of polynomials in the 
-PLONK proving scheme refers
-to specific evaluation domains,
-named Lagrangian polynomials,  
-based on interpolation of two 
-functions of particular group
-elements. The following section 
-gives a more comprehensive
-understanding to the way in 
-which these polynomials are 
-formed, given certain inputs. 
-
-
-Langrangian polynomials are 
-introduced as a means of 
-constructing continous 
-functions
-from discrete data. With alternative 
-polynomial constructions, discrete 
-data sets can be approximated; 
-Langrangian polynomials, 
-however, 
-form a solution that fits data exactly.
-This is achieved through *interpolation*, 
-which finds a linear combination of 'n' 
-inputted functions with respect to a 
-given data set which imposes 'n' 
-constraints and computes 
-an exact fitting solution. 
-
-Linear Algebra dictates that the interpolation polynomial ought 
-to be formed from the system \\({\mathbf A}(x)\\) = 
-\\({\mathbf b}\\), 
-where \\({\mathbf b}\_i\\) = 
-\\({\mathbf y}\_i\\), i = 0,...,n 
-and the entries of 
-\\({\mathbf A}(x)\\)
-are defined by \\({\mathbf a}\_{ij}\\) = 
-\\({\mathbf P}(x\_{i})\\),
-and \\(i,j \in 0,....,n,\\) 
-Additionally, the used points for the 
-interpolation are 
-\\(x\_{0},x\_{1}...,x\_{n}\\), 
-from which the data points
-\\(y\_{0},y\_{1}...,y\_{n}\\), are obtained, 
-and 
-\\({\mathbf P}\_j(x\_i) = x^{j}\\). 
-Where \\(i \in 0,1,...,n\\). The basis 
-\\(1,x,...,x^{n}\\)
-of the space of polynomials, degree n+1 is called the *monomial 
-basis*, and the corresponding matrix A is called the *Vandermode
-matrix* for the points \\(x\_{0},x\_{1}...,x\_{n}\\). 
-
-*Langrangian interpolation*, however, has the matrix A, as the identity 
-matrix. 
+With the Lagrange interpolation, however, matrix *A* is the identity matrix.
 This stems from writing the interpolating polynomial as:
 
-\\[
-\begin{aligned}
-\mathbf{p}\_n(x) = \sum_{j=0}^{n} y_i\mathbb{L}\_n,j(x)
-\end{aligned}
-\\]
-
-
-
+&emsp; *P<sub>n</sub>(x)* = &Sigma;<sub><em>j=0</em></sub><sup><em>n</em></sup>*y<sub>i</sub>*&Lopf;<sub><em>n</em></sub>*j(x)*
 
  The polynomials \\({\mathbb L}\_n\\) and  
  \\(j(x)\\) = 0,...,n are interpolations
