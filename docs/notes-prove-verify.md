@@ -88,7 +88,7 @@ With these specific bases, we can derive the relation between all sets of
 equations into one single polynomial equation, where we have a vector of inputs 
 to each gate type:
 
-&emsp; *Q<sub>L</sub>*(*x*)*a*(*x*) + *Q<sub>R</sub>b<sub>i</sub>* + *Q<sub>O</sub>c<sub>i</sub>* + *Q<sub>M</sub>a<sub>i</sub>b<sub>i</sub>*  + *Q<sub>R</sub>* = 0
+&emsp; *Q<sub>L</sub>*(*x*)*a*(*x*) + *Q<sub>R</sub>*(*x*)*b*(*x*) + *Q<sub>O</sub>*(*x*)*c*(*x*) + *Q<sub>M</sub>*(*x*)*a*(*x*)*b*(*x*) + *Q<sub>R</sub>*(*x*) = 0
 
 The utility for this in PLONK, 
 as a univeral SNARK, is that 
