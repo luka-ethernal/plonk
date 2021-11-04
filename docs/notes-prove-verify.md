@@ -1,190 +1,80 @@
-This module contains the notes on 
-how the prover algorithm is 
-constructed for PLONK.
+This module contains the notes on how the prover algorithm is constructed for 
+PLONK.
 
-PLONK proof construction 
-========================
+## PLONK proof construction 
 
-Following on from the generic
-SNARK construction, 
-here we will give the set up
-of a PLONK proof and show 
-which steps need to be satisfied
-to utilise the protocol.
+Following on from the generic SNARK construction, here we will give the set up 
+of a PLONK proof and show which steps need to be satisfied to utilise the 
+protocol.
 
-First we will explain the 
-derivation and simplification 
-of the arithmetic circuits. 
+First we will explain the derivation and simplification of the arithmetic 
+circuits. 
 
-PLONK uses both gate constraints 
-and copy constraints, to collect 
-like expressions. Using the same
-example of:
+PLONK uses both gate constraints and copy constraints, to collect like 
+expressions. Using the same example of:
 
-\\[
-\begin{aligned}
-\mathbf{W}\_L 
-\cdot 
-\mathbf{W}\_R = 
-\mathbf{W}\_O,
-\end{aligned}
-\\]
+&emsp; *W<sub>L</sub>* &sdot; *W<sub>R</sub>* = *W<sub>O</sub>*
 
-We can express multiples of the 
-same wires in or out of the same 
-gate, with the above equation.
+We can express multiples of the same wires in or out of the same gate, with the 
+above equation.
 
-Thus we have 'ith' gates, so the 
-index from left or right across 
-the circuit is mitigated for 
-wires which are equal. 
+Thus we have 'ith' gates, so the index from left or right across the circuit is 
+mitigated for wires which are equal.
 
 For example, in the two equations:
 
-\\[
-\begin{aligned}
-\mathbf{A}\_{1} 
-\circ 
-X 
-\cdot 
-\mathbf{B}\_{1} 
-\circ 
-X^2 
-= \mathbf{C}\_{1}
-\end{aligned}
-\\]
-and 
-\\[
-\begin{aligned}
-\mathbf{A}\_{2} 
-\circ 
-X^2 
-\cdot 
-\mathbf{B}\_{2} 
-\circ 
-X 
-= \mathbf{C}\_{2}
-\end{aligned}
-\\]
+&emsp; *A*<sub>1</sub> &compfn; *X* &sdot; *B*<sub>1</sub> &compn; *X*<sup>2</sup> = *C*<sub>1</sub>
 
-We can state the equalities that: 
-\\[
-\begin{aligned} 
-\mathbf{A}\_{1} = \mathbf{B}\_{2} \\\\
-&\\\\
-\mathbf{B}\_{1} = \mathbf{A}\_{2} \\\\
-\end{aligned}
-\\]
+and
 
-These are examples of constraints 
-collected in PLONK. Which is done
-the same for addition gates, except
-the gate constrain satisfies:
+&emsp; *A*<sub>2</sub> &compfn; *X*<sup>2</sup> &sdot; *B*<sub>2</sub> &compn; *X* = *C*<sub>2</sub>
 
-\\[
-\begin{aligned}
-\mathbf{W}\_L + \mathbf{W}\_R = \mathbf{W}\_O
-\end{aligned}
-\\]
+We can state the equalities that:
 
-PLONK also uses 'copy
-constraints', which are used to 
-associate wires, which have 
-equality, from the entire circuit.
-These constraints are checked 
-with a permutation argument. 
-In essence, this checks that 
-wires are not repeated by using 
-randomness given by the verifier. 
+&emsp; *A*<sub>1</sub> = *B*<sub>2</sub> and *B*<sub>2</sub> = *A*<sub>1</sub> 
 
-This process is better explained in 
-within the permutation section of
-the notes.
+These are examples of constraints collected in PLONK. Which is done the same 
+for addition gates, except the gate constrain satisfies:
 
-After the constraints
-are made, they are formatted into a 
-system of numerical equations, 
-which in PLONK are reduced to a 
-small amount of polynomial 
-equations which are capable of 
-representing the constraints.
-PLONK allows us to combine the
-two gate equations by describing 
-their relationship relative to 
-the role in the circuit.
-PLONK also has constants, which
-are denoted as 'Q'. These 
-values will change for each 
-programme. The shape of 
-the circuit is defined by
-these values. When they are 
-combined with the gate 
-equations, we get the 
-polynomial equation for 
-a reduced form as:
+&emsp; *W<sub>L</sub>* + *W<sub>R</sub>* = *W<sub>O</sub>*
 
-\\[
-\\\\ \mathbf{L} = left 
-\\\\ \mathbf{R} = right 
-\\\\ \mathbf{O} = output 
-\\\\ \mathbf{M} = multiplication 
-\\\\ \mathbf{C} = constants 
-\\]
+PLONK also uses 'copy constraints', which are used to associate wires, which 
+have equality, from the entire circuit.These constraints are checked with a 
+permutation argument. In essence, this checks that wires are not repeated by 
+using randomness given by the verifier.
 
-\\[ 
-\mathbf{Q}\_L \cdot \mathbb{a}\_i +
-\mathbf{Q}\_R \cdot \mathbb{b}\_i +
-\mathbf{Q}\_0 \cdot \mathbb{c}\_i +
-\mathbf{Q}\_M \cdot \mathbb{a}\_i\mathbb{b}\_i +
-\mathbf{Q}\_C = 0
-\\]
-This can be used for both
-addition and multiplication
-gates, where their values 
-can be provided by the user 
-depending on the circuit 
-composition. 
-For an addition gate, 
-we derive it as follows:
+This process is better explained in within the permutation section of the notes.
 
-\\[
-\begin{aligned}
-\mathbf{Q}\_L = 1, 
-\mathbf{Q}\_R = 1, 
-\mathbf{Q}\_0 = -1, 
-\mathbf{Q}\_M = 0, 
-\mathbf{Q}\_C = 1
-\end{aligned}
-\\]
+After the constraints are made, they are formatted into a system of numerical 
+equations, which in PLONK are reduced to a small amount of polynomial equations 
+which are capable of representing the constraints. PLONK allows us to combine 
+the two gate equations by describing their relationship relative to the role in 
+the circuit. PLONK also has constants, which are denoted as *Q*. These values 
+will change for each programme. The shape of the circuit is defined by these 
+values. When they are combined with the gate equations, we get the polynomial 
+equation for a reduced form as:
 
-Which results in:
-\\[ 
-\mathbb{a}\_{i} +
-\mathbb{b}\_{i} -
-\mathbb{c}\_{i} = 0
-\\]
+&emsp; *Q<sub>L</sub>* &sdot; *a<sub>i</sub>* + *Q<sub>R</sub>* &sdot; *a<sub>i</sub>* + *Q<sub>O</sub>* &sdot; *c<sub>i</sub>* + *Q<sub>M</sub>* &sdot; *a<sub>i</sub>b<sub>i</sub>*  + *Q<sub>R</sub>* = 0
 
-For a multiplication gate, 
-we derive it as follows:
+With *a<sub>i</sub>*, *b<sub>i</sub>* and *c<sub>i</sub>* the wires of the 
+*i*<sup>th</sup> gate and *Q<sub>L</sub>*, *Q<sub>R</sub>*, *Q<sub>O</sub>*, 
+*Q<sub>M</sub>* and *Q<sub>C</sub>* the left, right, output, middle and 
+constants wire selector respectively.
 
-\\[
-\begin{aligned}
-\mathbf{Q}\_L = 0, 
-\mathbf{Q}\_R = 0, 
-\mathbf{Q}\_0 = -1, 
-\mathbf{Q}\_M = 1, 
-\mathbf{Q}\_C = 0
-\end{aligned}
-\\]
+This can be used for both addition and multiplication gates, where their values 
+can be provided by the user depending on the circuit composition.
 
+Setting *Q<sub>M</sub>* = *Q<sub>C</sub>* = 0, 
+*Q<sub>L</sub>* = *Q<sub>R</sub>* = 1 and *Q<sub>O</sub>* = -1 
+results in the addition gate:
 
-Which results in:
-\\[ 
-\mathbb{a}\_{i} 
-\cdot
-\mathbb{b}\_{i} -
-\mathbb{c}\_{i} = 0
-\\]
+&emsp; *a<sub>i</sub>* + *b<sub>i</sub>* - *c<sub>i</sub>* = 0
+
+Setting *Q<sub>L</sub>* = *Q<sub>R</sub>* = *Q<sub>C</sub>* = 0, 
+*Q<sub>M</sub>* = 1 and *Q<sub>O</sub>* = -1 
+results in the addition gate:
+
+&emsp; *a<sub>i</sub>b<sub>i</sub>* - *c<sub>i</sub>* = 0
 
 With this format, there is 
 a specific method used to 

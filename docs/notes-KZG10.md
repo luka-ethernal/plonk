@@ -15,9 +15,9 @@ the commitment scheme to be homomorphic. The use of this linearizer in the
 PLONK protocol prevents us from being able to use Merkle-tree like techniques, 
 such as the [FRI protocol](https://drops.dagstuhl.de/opus/volltexte/2018/9018/pdf/LIPIcs-ICALP-2018-14.pdf).
 
-We use KZG10 commitments, often called 'Kate commitments', the commitments 
+We use KZG10 commitments, often called 'Kate commitments', the commitment 
 scheme created by Kate, Zaverucha and Goldberg.
-A deep explanation on how this particular commitment scheme operates can be 
+A detailed explanation on how this particular commitment scheme operates can be 
 found in the [original paper](https://www.iacr.org/archive/asiacrypt2010/6477178/6477178.pdf).
 Aside from the compatibility with the chosen linearization technique, there are 
 multiple benefits of using the KZG10 commitment scheme in the PLONK.
@@ -27,7 +27,7 @@ The cost of these commitments is also constant irrespective of the number of
 evaluations, so we are able to employ them with a low overhead cost.
 
 This commitment is used to commit to a polynomial, from a given structured 
-reference string (SRS) &Phi; by means of a bilinear pairing group.
+reference string (SRS) by means of a bilinear pairing group.
 Where &Gopf;<sub>1</sub> and &Gopf;<sub>2</sub> and groups two different 
 pairing curves with generators *g*<sub>1</sub> &isin; &Gopf;<sub>1</sub> 
 and *g*<sub>2</sub> &isin; &Gopf;<sub>2</sub>.
