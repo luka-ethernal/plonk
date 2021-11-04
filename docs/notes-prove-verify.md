@@ -127,7 +127,7 @@ solution.
 Linear Algebra dictates that the interpolation polynomial ought to be formed 
 from the system *A(x)* = *b*, where *b<sub>i</sub>* = *y<sub>i</sub>*, 
 *i* = 0,..,*n* and the entries of *A(x)* are defined by 
-*a<sub>ij</sub* = *P(x<sub>i</sub>*, and *i*,*j* &isin; 0,..,*n*.
+*a<sub>ij</sub>* = *P(x<sub>i</sub>)*, and *i*,*j* &isin; 0,..,*n*.
 Additionally, the used points for the interpolation are 
 *x<sub>0</sub>*,*x<sub>1</sub>*,..,*x<sub>n</sub>*, from which the data points
 *y<sub>0</sub>*,*y<sub>1</sub>*,..,*y<sub>n</sub>* are obtained and 
@@ -140,7 +140,7 @@ corresponding matrix *A* is called the **Vandermonde matrix** for the points
 With the Lagrange interpolation, however, matrix *A* is the identity matrix.
 This stems from writing the interpolating polynomial as:
 
-&emsp; *P<sub>n</sub>(x)* = &Sigma;<sub><em>j=0</em></sub><sup><em>n</em></sup>*y<sub>i</sub>*&Lopf;<sub><em>n</em></sub>*j(x)*
+&emsp; *P<sub>n</sub>(x)* = &Sigma;<em><sup>n</sup><sub>j=0<sub></em> *y<sub>i</sub>* &Lopf;<sub><em>n</em></sub>*j(x)*
 
  The polynomials \\({\mathbb L}\_n\\) and  
  \\(j(x)\\) = 0,...,n are interpolations
