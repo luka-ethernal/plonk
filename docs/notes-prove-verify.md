@@ -140,7 +140,7 @@ corresponding matrix *A* is called the **Vandermonde matrix** for the points
 With the Lagrange interpolation, however, matrix *A* is the identity matrix.
 This stems from writing the interpolating polynomial as:
 
-&emsp; *P<sub>n</sub>(x)* = &Sigma;<em><sup>n</sup><sub>j=0<sub></em> *y<sub>i</sub>* &Lopf;<sub><em>n</em></sub>*j(x)*
+&emsp; *P<sub>n</sub>(x)* = &sum;<em><sup>n</sup><sub>j=0<sub></em> *y<sub>i</sub>* &Lopf;<sub><em>n</em></sub>*j(x)*
 
  The polynomials \\({\mathbb L}\_n\\) and  
  \\(j(x)\\) = 0,...,n are interpolations
