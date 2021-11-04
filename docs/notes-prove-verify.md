@@ -23,11 +23,11 @@ mitigated for wires which are equal.
 
 For example, in the two equations:
 
-&emsp; *A*<sub>1</sub> &compfn; *X* &sdot; *B*<sub>1</sub> &compn; *X*<sup>2</sup> = *C*<sub>1</sub>
+&emsp; *A*<sub>1</sub> &compfn; *X* &sdot; *B*<sub>1</sub> &compfn; *X*<sup>2</sup> = *C*<sub>1</sub>
 
 and
 
-&emsp; *A*<sub>2</sub> &compfn; *X*<sup>2</sup> &sdot; *B*<sub>2</sub> &compn; *X* = *C*<sub>2</sub>
+&emsp; *A*<sub>2</sub> &compfn; *X*<sup>2</sup> &sdot; *B*<sub>2</sub> &compfn; *X* = *C*<sub>2</sub>
 
 We can state the equalities that:
 
@@ -54,7 +54,7 @@ will change for each programme. The shape of the circuit is defined by these
 values. When they are combined with the gate equations, we get the polynomial 
 equation for a reduced form as:
 
-&emsp; *Q<sub>L</sub>* &sdot; *a<sub>i</sub>* + *Q<sub>R</sub>* &sdot; *a<sub>i</sub>* + *Q<sub>O</sub>* &sdot; *c<sub>i</sub>* + *Q<sub>M</sub>* &sdot; *a<sub>i</sub>b<sub>i</sub>*  + *Q<sub>R</sub>* = 0
+&emsp; *Q<sub>L</sub>a<sub>i</sub>* + *Q<sub>R</sub>a<sub>i</sub>* + *Q<sub>O</sub>c<sub>i</sub>* + *Q<sub>M</sub>a<sub>i</sub>b<sub>i</sub>*  + *Q<sub>R</sub>* = 0
 
 With *a<sub>i</sub>*, *b<sub>i</sub>* and *c<sub>i</sub>* the wires of the 
 *i*<sup>th</sup> gate and *Q<sub>L</sub>*, *Q<sub>R</sub>*, *Q<sub>O</sub>*, 
