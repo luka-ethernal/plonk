@@ -54,7 +54,7 @@ will change for each programme. The shape of the circuit is defined by these
 values. When they are combined with the gate equations, we get the polynomial 
 equation for a reduced form as:
 
-&emsp; *Q<sub>L</sub>a<sub>i</sub>* + *Q<sub>R</sub>a<sub>i</sub>* + *Q<sub>O</sub>c<sub>i</sub>* + *Q<sub>M</sub>a<sub>i</sub>b<sub>i</sub>*  + *Q<sub>R</sub>* = 0
+&emsp; *Q<sub>L</sub>a<sub>i</sub>* + *Q<sub>R</sub>b<sub>i</sub>* + *Q<sub>O</sub>c<sub>i</sub>* + *Q<sub>M</sub>a<sub>i</sub>b<sub>i</sub>*  + *Q<sub>R</sub>* = 0
 
 With *a<sub>i</sub>*, *b<sub>i</sub>* and *c<sub>i</sub>* the wires of the 
 *i*<sup>th</sup> gate and *Q<sub>L</sub>*, *Q<sub>R</sub>*, *Q<sub>O</sub>*, 
@@ -76,44 +76,19 @@ results in the addition gate:
 
 &emsp; *a<sub>i</sub>b<sub>i</sub>* - *c<sub>i</sub>* = 0
 
-With this format, there is 
-a specific method used to 
-convert all the equations 
-into polynomial form.
-Basically, in order to
-bundle
-these together, PLONK can 
-take sets of equations and 
-turn them into one single 
-equation over polynomials. 
-This is called the evaluation 
-form. We are then able to 
-use Lagrangian interpolation
-to convert to coefficient form. 
-The only thing this interpolation 
-is doing,
-is allowing us to evaluate a
-functions over specific points,
-for 'x' values, where the target
-polynomial is equal to '1' or 
-'0'.
+With this format, there is a specific method used to convert all the equations 
+into polynomial form.Basically, in order to bundle these together, PLONK can 
+take sets of equations and turn them into one single equation over polynomials. 
+This is called the evaluation form. We are then able to use Lagrangian 
+interpolation to convert to coefficient form. The only thing this interpolation 
+is doing,is allowing us to evaluate a functions over specific points,for 'x' 
+values, where the target polynomial is equal to 1 or 0.
 
-With these specific bases, we
-can derive the relation between 
-all sets of equations into one 
-single polynomial equation,
-where we have a vector of inputs
+With these specific bases, we can derive the relation between all sets of 
+equations into one single polynomial equation, where we have a vector of inputs 
 to each gate type:
-\\[
-\begin{aligned}
-\mathbf{Q}\_L(x) \cdot a(x) +
-\mathbf{Q}\_R(x) \cdot b(x) +
-\mathbf{Q}\_0(x) \cdot c(x) +
-\mathbf{Q}\_M(x) \cdot a(x)b(x) +
-\mathbf{Q}\_C(x) =
-0
-\end{aligned}
-\\]
+
+&emsp; *Q<sub>L</sub>*(*x*)*a*(*x*) + *Q<sub>R</sub>b<sub>i</sub>* + *Q<sub>O</sub>c<sub>i</sub>* + *Q<sub>M</sub>a<sub>i</sub>b<sub>i</sub>*  + *Q<sub>R</sub>* = 0
 
 The utility for this in PLONK, 
 as a univeral SNARK, is that 
