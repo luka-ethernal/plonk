@@ -157,10 +157,10 @@ polynomial** of *f(x)*.
 
 To understand these as an expanded product argument, it can be written as
 
-Given a set of k + 1 data points *(x<sub>j</sub>,y<sub>j</sub)* with *j* &isin; 
+Given a set of k + 1 data points *(x<sub>j</sub>,y<sub>j</sub>)* with *j* &isin; 
 *{0,..,k}*
 
-where *(x<sub>j</sub>,y<sub>j</sub)* &ne; *(x<sub>i</sub>,y<sub>i</sub)* for 
+where *(x<sub>j</sub>,y<sub>j</sub)* &ne; *(x<sub>i</sub>,y<sub>i</sub>)* for 
 all *i*&ne;*j*, *i,j*&isin;*{0,..,n}*.
 
 The interpolation polynomial in the Lagrange form is a linear combination
