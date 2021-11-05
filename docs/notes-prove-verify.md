@@ -147,46 +147,26 @@ interpolations of the points *x<sub>0</sub>*,*x<sub>1</sub>*,..,*x<sub>n</sub>*.
 They are commonly called the **Lagrangian polynomials**. They are written in 
 the form:
 
-\\[
-\begin{aligned}
-\mathbb{L}\_n,j(x) = 
-\prod_{m=0}^{k} 
-\frac{(x-x\_{m})}
-{(x\_{j}-x\_{m})}
-\end{aligned}
-\\]
+![Lagrange polynomial](graphics/fig2.png)
 
- the unique solution polynomial of degree 'n' that satisfies this 
-\\[
-\begin{aligned}
-\mathbf{P}\_n(x\_j)
-\end{aligned}
-\\]
+the unique solution polynomial of degree *n* that satisfies 
+*P<sub>n</sub>(x<sub>j</sub>*, where *i,j* = *f(x<sub>j</sub>)*, *j* = 0,1,..,*n*
 
-where
-\\[
-\begin{aligned}
-i,j = \mathbb{f}(x\_j), \mathbb{j} = 0,1,...1,n
-\end{aligned}
-\\]
+The polynomial *P<sub>n</sub>(x<sub>j</sub>)* is called the **interpolating
+polynomial** of *f(x)*.
 
- This polynomial, \\({\mathbf P}\_n(x\_j)\\) 
- is called the *interpolating
- polynomial* of \\(\mathbb{f}(x)\\). 
+To understand these as an expanded product argument, it can be written as
 
- To understand these as an expanded product argument, it can be written as
+Given a set of k + 1 data points *(x<sub>j</sub>,y<sub>j</sub)* with *j* &isin; 
+*{0,..,k}*
 
- Given a set of k + 1 data points
+where *(x<sub>j</sub>,y<sub>j</sub)* &ne; *(x<sub>i</sub>,y<sub>i</sub)* for 
+all *i*&ne;*j*, *i,j*&isin;*{0,..,n}*.
 
-[data points](https://wikimedia.org/api/rest_v1/media/math/render/svg/5e4f064b4751bb32d87cc829aca1b2b2f38d4a6d)
+The interpolation polynomial in the Lagrange form is a linear combination
 
-where no two  
-[x_j](https://wikimedia.org/api/rest_v1/media/math/render/svg/5db47cb3d2f9496205a17a6856c91c1d3d363ccd) are the same, 
-the interpolation polynomial in the Lagrange form is a linear combination
+![Lagrange polynomial](graphics/fig3.png)
 
-[Lagrange polynomial](https://wikimedia.org/api/rest_v1/media/math/render/svg/d07f3378ff7718c345e5d3d4a57d3053190226a0)
+of Lagrange basis polynomials
 
-of Lagrange basis polynomials.
-[Basis Polynomial](https://wikimedia.org/api/rest_v1/media/math/render/svg/6e2c3a2ab16a8723c0446de6a30da839198fb04b)
- 
- 
+![basis polynomials](graphics/fig4.png)
