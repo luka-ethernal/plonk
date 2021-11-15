@@ -19,7 +19,7 @@ use dusk_bytes::{DeserializableSlice, Serializable};
 /// only for fields that have a large multiplicative subgroup of size that is
 /// a power-of-2.
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
-pub(crate) struct EvaluationDomain {
+pub struct EvaluationDomain {
     /// The size of the domain.
     pub(crate) size: u64,
     /// `log_2(self.size)`.
@@ -97,7 +97,7 @@ pub(crate) mod alloc {
     impl EvaluationDomain {
         /// Construct a domain that is large enough for evaluations of a
         /// polynomial having `num_coeffs` coefficients.
-        pub(crate) fn new(num_coeffs: usize) -> Result<Self, Error> {
+        pub fn new(num_coeffs: usize) -> Result<Self, Error> {
             // Compute the size of our evaluation domain
             let size = num_coeffs.next_power_of_two() as u64;
             let log_size_of_group = size.trailing_zeros();
@@ -131,7 +131,7 @@ pub(crate) mod alloc {
         }
 
         /// Return the size of `self`.
-        pub(crate) fn size(&self) -> usize {
+        pub fn size(&self) -> usize {
             self.size as usize
         }
 
@@ -147,6 +147,11 @@ pub(crate) mod alloc {
             coeffs.resize(self.size(), BlsScalar::zero());
             best_fft(coeffs, self.group_gen, self.log_size_of_group)
         }
+        
+        /// Compute a FFT, modifying the slice in place.
+        pub fn fft_slice(&self, coeffs: &mut [BlsScalar]) {
+            best_fft(coeffs, self.group_gen, self.log_size_of_group)
+        }
 
         /// Compute an IFFT.
         pub(crate) fn ifft(&self, evals: &[BlsScalar]) -> Vec<BlsScalar> {
@@ -154,11 +159,10 @@ pub(crate) mod alloc {
             self.ifft_in_place(&mut evals);
             evals
         }
-
-        /// Compute an IFFT, modifying the vector in place.
+    
+        /// Compute an IFFT, modifying the slice in place.
         #[inline]
-        pub(crate) fn ifft_in_place(&self, evals: &mut Vec<BlsScalar>) {
-            evals.resize(self.size(), BlsScalar::zero());
+        pub fn ifft_slice(&self, evals: &mut [BlsScalar]) {
             best_fft(evals, self.group_gen_inv, self.log_size_of_group);
 
             #[cfg(not(feature = "std"))]
@@ -166,6 +170,14 @@ pub(crate) mod alloc {
 
             #[cfg(feature = "std")]
             evals.par_iter_mut().for_each(|val| *val *= &self.size_inv);
+        }
+
+
+        /// Compute an IFFT, modifying the vector in place.
+        #[inline]
+        pub fn ifft_in_place(&self, evals: &mut Vec<BlsScalar>) {
+            evals.resize(self.size(), BlsScalar::zero());
+            self.ifft_slice(evals.as_mut_slice());
         }
 
         fn distribute_powers(coeffs: &mut [BlsScalar], g: BlsScalar) {
@@ -291,7 +303,7 @@ pub(crate) mod alloc {
         }
 
         /// Return an iterator over the elements of the domain.
-        pub(crate) fn elements(&self) -> Elements {
+        pub fn elements(&self) -> Elements {
             Elements {
                 cur_elem: BlsScalar::one(),
                 cur_pow: 0,
@@ -358,7 +370,7 @@ pub(crate) mod alloc {
 
     /// An iterator over the elements of the domain.
     #[derive(Debug)]
-    pub(crate) struct Elements {
+    pub struct Elements {
         cur_elem: BlsScalar,
         cur_pow: u64,
         domain: EvaluationDomain,
