@@ -11,7 +11,7 @@ use dusk_bytes::{DeserializableSlice, Serializable};
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 /// Holds a commitment to a polynomial in a form of a [`G1Affine`]-bls12_381
 /// point.
-pub(crate) struct Commitment(
+pub struct Commitment(
     /// The commitment is a group element.
     pub(crate) G1Affine,
 );

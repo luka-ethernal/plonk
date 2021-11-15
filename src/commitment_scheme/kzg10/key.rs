@@ -157,7 +157,7 @@ impl CommitKey {
     ///
     /// Returns an error if the polynomial's degree is more than the max degree
     /// of the commit key.
-    pub(crate) fn commit(
+    pub fn commit(
         &self,
         polynomial: &Polynomial,
     ) -> Result<Commitment, Error> {
@@ -170,6 +170,18 @@ impl CommitKey {
             &polynomial.coeffs,
         )))
     }
+
+    /// For a given polynomial `p` and a point `z`, compute the witness
+    /// for p(z) using Ruffini's method for simplicity.
+    /// The Witness is the quotient of f(x) - f(z) / x-z.
+    /// However we note that the quotient polynomial is invariant under the value f(z)
+    /// ie. only the remainder changes. We can therefore compute the witness as f(x) / x - z
+    /// and only use the remainder term f(z) during verification.
+    pub fn compute_single_witness(&self, polynomial: &Polynomial, point: &BlsScalar) -> Polynomial {
+        // Computes `f(x) / x-z`, returning it as the witness poly
+        polynomial.ruffini(*point)
+    }
+
 
     /// Computes a single witness for multiple polynomials at the same point, by
     /// taking a random linear combination of the individual witnesses.
@@ -338,7 +350,7 @@ mod test {
         value: &BlsScalar,
         point: &BlsScalar,
     ) -> Result<Proof, Error> {
-        let witness_poly = compute_single_witness(polynomial, point);
+        let witness_poly = polynomial.compute_single_witness(point);
         Ok(Proof {
             commitment_to_witness: ck.commit(&witness_poly)?,
             evaluated_point: *value,
@@ -376,21 +388,6 @@ mod test {
             commitments_to_polynomials: polynomial_commitments,
         };
         Ok(aggregate_proof)
-    }
-
-    // For a given polynomial `p` and a point `z`, compute the witness
-    // for p(z) using Ruffini's method for simplicity.
-    // The Witness is the quotient of f(x) - f(z) / x-z.
-    // However we note that the quotient polynomial is invariant under the value
-    // f(z) ie. only the remainder changes. We can therefore compute the
-    // witness as f(x) / x - z and only use the remainder term f(z) during
-    // verification.
-    fn compute_single_witness(
-        polynomial: &Polynomial,
-        point: &BlsScalar,
-    ) -> Polynomial {
-        // Computes `f(x) / x-z`, returning it as the witness poly
-        polynomial.ruffini(*point)
     }
 
     // Creates a proving key and verifier key based on a specified degree
