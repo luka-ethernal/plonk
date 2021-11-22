@@ -350,7 +350,7 @@ mod test {
         value: &BlsScalar,
         point: &BlsScalar,
     ) -> Result<Proof, Error> {
-        let witness_poly = polynomial.compute_single_witness(point);
+        let witness_poly = ck.compute_single_witness(polynomial, point);
         Ok(Proof {
             commitment_to_witness: ck.commit(&witness_poly)?,
             evaluated_point: *value,
