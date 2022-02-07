@@ -16,6 +16,9 @@ if #[cfg(feature = "alloc")]
     pub use srs::PublicParameters;
 });
 
-pub(crate) mod commitment;
-pub(crate) mod proof;
+/// KZG10 commitments
+pub mod commitment;
+
+/// KZG10 proofs
+pub mod proof;
 pub(crate) use commitment::Commitment;

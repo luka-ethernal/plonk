@@ -21,19 +21,19 @@ use dusk_bytes::{DeserializableSlice, Serializable};
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub struct EvaluationDomain {
     /// The size of the domain.
-    pub(crate) size: u64,
+    pub size: u64,
     /// `log_2(self.size)`.
-    pub(crate) log_size_of_group: u32,
+    pub log_size_of_group: u32,
     /// Size of the domain as a field element.
-    pub(crate) size_as_field_element: BlsScalar,
+    pub size_as_field_element: BlsScalar,
     /// Inverse of the size in the field.
-    pub(crate) size_inv: BlsScalar,
+    pub size_inv: BlsScalar,
     /// A generator of the subgroup.
-    pub(crate) group_gen: BlsScalar,
+    pub group_gen: BlsScalar,
     /// Inverse of the generator of the subgroup.
-    pub(crate) group_gen_inv: BlsScalar,
+    pub group_gen_inv: BlsScalar,
     /// Multiplicative generator of the finite field.
-    pub(crate) generator_inv: BlsScalar,
+    pub generator_inv: BlsScalar,
 }
 
 impl Serializable<{ u64::SIZE + u32::SIZE + 5 * BlsScalar::SIZE }>
@@ -136,7 +136,7 @@ pub(crate) mod alloc {
         }
 
         /// Compute a FFT.
-        pub(crate) fn fft(&self, coeffs: &[BlsScalar]) -> Vec<BlsScalar> {
+        pub fn fft(&self, coeffs: &[BlsScalar]) -> Vec<BlsScalar> {
             let mut coeffs = coeffs.to_vec();
             self.fft_in_place(&mut coeffs);
             coeffs
@@ -147,19 +147,19 @@ pub(crate) mod alloc {
             coeffs.resize(self.size(), BlsScalar::zero());
             best_fft(coeffs, self.group_gen, self.log_size_of_group)
         }
-        
+
         /// Compute a FFT, modifying the slice in place.
         pub fn fft_slice(&self, coeffs: &mut [BlsScalar]) {
             best_fft(coeffs, self.group_gen, self.log_size_of_group)
         }
 
         /// Compute an IFFT.
-        pub(crate) fn ifft(&self, evals: &[BlsScalar]) -> Vec<BlsScalar> {
+        pub fn ifft(&self, evals: &[BlsScalar]) -> Vec<BlsScalar> {
             let mut evals = evals.to_vec();
             self.ifft_in_place(&mut evals);
             evals
         }
-    
+
         /// Compute an IFFT, modifying the slice in place.
         #[inline]
         pub fn ifft_slice(&self, evals: &mut [BlsScalar]) {
@@ -171,7 +171,6 @@ pub(crate) mod alloc {
             #[cfg(feature = "std")]
             evals.par_iter_mut().for_each(|val| *val *= &self.size_inv);
         }
-
 
         /// Compute an IFFT, modifying the vector in place.
         #[inline]

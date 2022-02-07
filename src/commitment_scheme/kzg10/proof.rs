@@ -10,14 +10,14 @@ use dusk_bls12_381::BlsScalar;
 #[derive(Copy, Clone, Debug)]
 /// Proof that a polynomial `p` was correctly evaluated at a point `z`
 /// producing the evaluated point p(z).
-pub(crate) struct Proof {
+pub struct Proof {
     /// This is a commitment to the witness polynomial.
-    pub(crate) commitment_to_witness: Commitment,
+    pub commitment_to_witness: Commitment,
     /// This is the result of evaluating a polynomial at the point `z`.
-    pub(crate) evaluated_point: BlsScalar,
+    pub evaluated_point: BlsScalar,
     /// This is the commitment to the polynomial that you want to prove a
     /// statement about.
-    pub(crate) commitment_to_polynomial: Commitment,
+    pub commitment_to_polynomial: Commitment,
 }
 
 #[cfg(feature = "alloc")]

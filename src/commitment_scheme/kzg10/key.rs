@@ -157,10 +157,7 @@ impl CommitKey {
     ///
     /// Returns an error if the polynomial's degree is more than the max degree
     /// of the commit key.
-    pub fn commit(
-        &self,
-        polynomial: &Polynomial,
-    ) -> Result<Commitment, Error> {
+    pub fn commit(&self, polynomial: &Polynomial) -> Result<Commitment, Error> {
         // Check whether we can safely commit to this polynomial
         self.check_commit_degree_is_within_bounds(polynomial.degree())?;
 
@@ -174,14 +171,18 @@ impl CommitKey {
     /// For a given polynomial `p` and a point `z`, compute the witness
     /// for p(z) using Ruffini's method for simplicity.
     /// The Witness is the quotient of f(x) - f(z) / x-z.
-    /// However we note that the quotient polynomial is invariant under the value f(z)
-    /// ie. only the remainder changes. We can therefore compute the witness as f(x) / x - z
-    /// and only use the remainder term f(z) during verification.
-    pub fn compute_single_witness(&self, polynomial: &Polynomial, point: &BlsScalar) -> Polynomial {
+    /// However we note that the quotient polynomial is invariant under the
+    /// value f(z) ie. only the remainder changes. We can therefore compute
+    /// the witness as f(x) / x - z and only use the remainder term f(z)
+    /// during verification.
+    pub fn compute_single_witness(
+        &self,
+        polynomial: &Polynomial,
+        point: &BlsScalar,
+    ) -> Polynomial {
         // Computes `f(x) / x-z`, returning it as the witness poly
         polynomial.ruffini(*point)
     }
-
 
     /// Computes a single witness for multiple polynomials at the same point, by
     /// taking a random linear combination of the individual witnesses.
@@ -267,7 +268,7 @@ impl OpeningKey {
 
     /// Checks whether a batch of polynomials evaluated at different points,
     /// returned their specified value.
-    pub(crate) fn batch_check(
+    pub fn batch_check(
         &self,
         points: &[BlsScalar],
         proofs: &[Proof],
