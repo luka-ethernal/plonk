@@ -18,9 +18,9 @@ use dusk_bytes::{DeserializableSlice, Serializable};
 
 /// Stores a polynomial in evaluation form.
 #[derive(PartialEq, Eq, Debug, Clone)]
-pub(crate) struct Evaluations {
+pub struct Evaluations {
     /// The evaluations of a polynomial over the domain `D`
-    pub(crate) evals: Vec<BlsScalar>,
+    pub evals: Vec<BlsScalar>,
     #[doc(hidden)]
     // FIXME: We should probably remove that and should be an external object.
     domain: EvaluationDomain,
@@ -52,7 +52,7 @@ impl Evaluations {
     }
 
     /// Construct `Self` from evaluations and a domain.
-    pub(crate) const fn from_vec_and_domain(
+    pub const fn from_vec_and_domain(
         evals: Vec<BlsScalar>,
         domain: EvaluationDomain,
     ) -> Self {
@@ -60,7 +60,7 @@ impl Evaluations {
     }
 
     /// Interpolate a polynomial from a list of evaluations
-    pub(crate) fn interpolate(self) -> Polynomial {
+    pub fn interpolate(self) -> Polynomial {
         let Self { mut evals, domain } = self;
         domain.ifft_in_place(&mut evals);
         Polynomial::from_coefficients_vec(evals)

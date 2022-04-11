@@ -74,7 +74,7 @@ if #[cfg(feature = "alloc")] {
     pub mod plonkup;
 });
 
-mod fft;
+pub mod fft;
 mod transcript;
 
 pub mod commitment_scheme;
