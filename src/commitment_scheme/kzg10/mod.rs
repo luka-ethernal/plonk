@@ -21,4 +21,4 @@ pub mod commitment;
 
 /// KZG10 proofs
 pub mod proof;
-pub(crate) use commitment::Commitment;
+pub use commitment::Commitment;

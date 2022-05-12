@@ -13,7 +13,7 @@ use dusk_bytes::{DeserializableSlice, Serializable};
 /// point.
 pub struct Commitment(
     /// The commitment is a group element.
-    pub(crate) G1Affine,
+    pub G1Affine,
 );
 
 impl From<G1Affine> for Commitment {
