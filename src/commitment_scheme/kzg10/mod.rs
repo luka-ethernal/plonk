@@ -22,3 +22,4 @@ pub mod commitment;
 /// KZG10 proofs
 pub mod proof;
 pub use commitment::Commitment;
+pub use dusk_bls12_381::{G1Affine, G1Projective};
