@@ -266,6 +266,25 @@ impl OpeningKey {
         }
     }
 
+    /// Checks that a polynomial `p` was evaluated at a point `z` and returned
+    /// the value specified `v`. ie. v = p(z).
+    pub fn check(&self, point: BlsScalar, proof: Proof) -> bool {
+        let inner_a: G1Affine = (proof.commitment_to_polynomial.0
+            - (self.g * proof.evaluated_point))
+            .into();
+
+        let inner_b: G2Affine = (self.beta_h - (self.h * point)).into();
+        let prepared_inner_b = G2Prepared::from(-inner_b);
+
+        let pairing = dusk_bls12_381::multi_miller_loop(&[
+            (&inner_a, &self.prepared_h),
+            (&proof.commitment_to_witness.0, &prepared_inner_b),
+        ])
+        .final_exponentiation();
+
+        pairing == dusk_bls12_381::Gt::identity()
+    }
+
     /// Checks whether a batch of polynomials evaluated at different points,
     /// returned their specified value.
     pub fn batch_check(
