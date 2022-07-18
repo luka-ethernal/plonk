@@ -19,7 +19,7 @@ use dusk_bytes::{DeserializableSlice, Serializable};
 /// Represents a polynomial in coeffiient form.
 pub struct Polynomial {
     /// The coefficient of `x^i` is stored at location `i` in `self.coeffs`.
-    pub(crate) coeffs: Vec<BlsScalar>,
+    pub coeffs: Vec<BlsScalar>,
 }
 
 impl Deref for Polynomial {
