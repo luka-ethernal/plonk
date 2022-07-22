@@ -23,7 +23,7 @@ edition = "2018"
 [dependencies]
 merlin = {version = "3.0", default-features = false}
 rand_core = {version="0.6", default-features=false}
-dusk-bytes = "0.1"
+dusk-bytes = "0.1.6"
 dusk-bls12_381 = {version = "0.8", default-features = false, features = ["groups", "pairings", "endo"]}
 dusk-jubjub = {version = "0.10", default-features = false}
 itertools = {version = "0.9", default-features = false}
