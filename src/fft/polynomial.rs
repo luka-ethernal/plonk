@@ -31,10 +31,10 @@ use rkyv::{
     archive(bound(serialize = "__S: Serializer + ScratchSpace")),
     archive_attr(derive(CheckBytes))
 )]
-pub(crate) struct Polynomial {
+pub struct Polynomial {
     /// The coefficient of `x^i` is stored at location `i` in `self.coeffs`.
     #[cfg_attr(feature = "rkyv-impl", omit_bounds)]
-    pub(crate) coeffs: Vec<BlsScalar>,
+    pub coeffs: Vec<BlsScalar>,
 }
 
 impl Deref for Polynomial {

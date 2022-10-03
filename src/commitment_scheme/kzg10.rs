@@ -25,7 +25,8 @@ if #[cfg(feature = "alloc")]
     );
 });
 
-pub(crate) mod commitment;
-pub(crate) mod proof;
+pub mod commitment;
+/// Polynomial proofs
+pub mod proof;
 
 pub(crate) use commitment::Commitment;

@@ -32,10 +32,10 @@ use rkyv::{
     archive(bound(serialize = "__S: Serializer + ScratchSpace")),
     archive_attr(derive(CheckBytes))
 )]
-pub(crate) struct Evaluations {
+pub struct Evaluations {
     /// The evaluations of a polynomial over the domain `D`
     #[cfg_attr(feature = "rkyv-impl", omit_bounds)]
-    pub(crate) evals: Vec<BlsScalar>,
+    pub evals: Vec<BlsScalar>,
     // FIXME: We should probably remove this and make it an external object.
     #[doc(hidden)]
     #[cfg_attr(feature = "rkyv-impl", omit_bounds)]
@@ -68,7 +68,7 @@ impl Evaluations {
     }
 
     /// Construct `Self` from evaluations and a domain.
-    pub(crate) const fn from_vec_and_domain(
+    pub const fn from_vec_and_domain(
         evals: Vec<BlsScalar>,
         domain: EvaluationDomain,
     ) -> Self {
@@ -76,7 +76,7 @@ impl Evaluations {
     }
 
     /// Interpolate a polynomial from a list of evaluations
-    pub(crate) fn interpolate(self) -> Polynomial {
+    pub fn interpolate(self) -> Polynomial {
         let Self { mut evals, domain } = self;
         domain.ifft_in_place(&mut evals);
         Polynomial::from_coefficients_vec(evals)

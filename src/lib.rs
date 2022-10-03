@@ -70,7 +70,7 @@ if #[cfg(feature = "alloc")] {
     pub mod constraint_system;
 });
 
-mod fft;
+pub mod fft;
 mod transcript;
 
 pub mod commitment_scheme;
@@ -89,3 +89,9 @@ pub mod notes {
     #[doc = include_str!("../docs/notes-KZG10.md")]
     pub mod kzg10_docs {}
 }
+
+/// Re-exported dusk-bls12_381 fork.
+pub use dusk_bls12_381 as bls12_381;
+
+/// Re-exported dusk-jubjub fork.
+pub use dusk_jubjub as jubjub;

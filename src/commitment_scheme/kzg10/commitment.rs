@@ -25,10 +25,10 @@ use rkyv::{
     archive(bound(serialize = "__S: Serializer + ScratchSpace")),
     archive_attr(derive(CheckBytes))
 )]
-pub(crate) struct Commitment(
+pub struct Commitment(
     /// The commitment is a group element.
     #[cfg_attr(feature = "rkyv-impl", omit_bounds)]
-    pub(crate) G1Affine,
+    pub G1Affine,
 );
 
 impl From<G1Affine> for Commitment {
